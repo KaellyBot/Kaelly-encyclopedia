@@ -6,7 +6,7 @@ go 1.20
 
 require (
 	github.com/dofusdude/dodugo v0.7.1
-	github.com/kaellybot/kaelly-amqp v0.0.2
+	github.com/kaellybot/kaelly-amqp v0.0.2-beta3
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.14.0
 )

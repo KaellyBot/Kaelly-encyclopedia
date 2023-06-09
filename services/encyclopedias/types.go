@@ -19,7 +19,7 @@ type Service interface {
 
 type Impl struct {
 	// TODO is this right element to use?
-	dofusdudeClient dodugo.APIClient
+	dofusdudeClient *dodugo.APIClient
 	broker          amqp.MessageBroker
 	httpTimeout     time.Duration
 }

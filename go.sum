@@ -136,8 +136,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
-github.com/kaellybot/kaelly-amqp v0.0.2 h1:Lal/CHuBmtLC05p5wudnCgfJPQFPlkKyfKX9m1Sn81Y=
-github.com/kaellybot/kaelly-amqp v0.0.2/go.mod h1:ymW2PEel1b+Ro3Du667MBJmDr0tFYG7LtaqfbTA/5VU=
+github.com/kaellybot/kaelly-amqp v0.0.2-beta3 h1:gE6Ek6HyjAwPElT34VB6GS8GeaAShppW/SY9RJrRN9c=
+github.com/kaellybot/kaelly-amqp v0.0.2-beta3/go.mod h1:ymW2PEel1b+Ro3Du667MBJmDr0tFYG7LtaqfbTA/5VU=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kr/fs v0.1.0/go.mod h1:FFnZGqtBN9Gxj7eW1uZ42v5BccTP0vu6NEaFoC2HwRg=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
