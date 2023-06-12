@@ -4,6 +4,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
+	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -17,7 +18,9 @@ func New() (*Impl, error) {
 	}
 
 	// services
-	encyclopediaService, err := encyclopedias.New(broker)
+	storeService := stores.New()
+
+	encyclopediaService, err := encyclopedias.New(broker, storeService)
 	if err != nil {
 		return nil, err
 	}

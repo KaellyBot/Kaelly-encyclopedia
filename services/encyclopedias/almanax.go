@@ -1,12 +1,14 @@
 package encyclopedias
 
 import (
+	"context"
+
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) almanaxRequest(message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) almanaxRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
 	request := message.EncyclopediaAlmanaxRequest
 	if !isValidAlmanaxRequest(request) {
 		service.publishAlmanaxAnswerFailed(correlationID, message.Language)

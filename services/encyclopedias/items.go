@@ -1,13 +1,15 @@
 package encyclopedias
 
 import (
+	"context"
+
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) itemListRequest(message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) itemListRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
 	request := message.EncyclopediaItemListRequest
 	if !isValidItemListRequest(request) {
 		service.publishItemListAnswerFailed(correlationID, message.Language)
@@ -15,9 +17,10 @@ func (service *Impl) itemListRequest(message *amqp.RabbitMQMessage, correlationI
 	}
 
 	log.Info().Str(constants.LogCorrelationID, correlationID).
+		Str(constants.LogQueryID, request.Query).
 		Msgf("Get item list encyclopedia request received")
 
-	dodugoItems, err := service.GetItemsAllSearch(request.Query, mappers.MapLanguage(message.Language))
+	dodugoItems, err := service.GetItemsAllSearch(ctx, request.Query, mappers.MapLanguage(message.Language))
 	if err != nil {
 		log.Error().Err(err).
 			Str(constants.LogCorrelationID, correlationID).
@@ -31,7 +34,7 @@ func (service *Impl) itemListRequest(message *amqp.RabbitMQMessage, correlationI
 	service.publishItemListAnswerSuccess(items, correlationID, message.Language)
 }
 
-func (service *Impl) itemRequest(message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) itemRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
 	request := message.EncyclopediaItemRequest
 	if !isValidItemRequest(request) {
 		service.publishItemAnswerFailed(correlationID, message.Language)

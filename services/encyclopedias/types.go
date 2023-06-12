@@ -5,6 +5,7 @@ import (
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 )
 
 const (
@@ -13,13 +14,21 @@ const (
 	answersRoutingkey  = "answers.encyclopedias"
 )
 
+type objectType string
+
+const (
+	almanax objectType = "almanax"
+	item    objectType = "items"
+	set     objectType = "sets"
+)
+
 type Service interface {
 	Consume() error
 }
 
 type Impl struct {
-	// TODO is this right element to use?
-	dofusdudeClient *dodugo.APIClient
+	dofusDudeClient *dodugo.APIClient
+	storeService    stores.Service
 	broker          amqp.MessageBroker
 	httpTimeout     time.Duration
 }

@@ -2,24 +2,25 @@ package encyclopedias
 
 import (
 	"context"
-	"time"
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-func New(broker amqp.MessageBroker) (*Impl, error) {
+func New(broker amqp.MessageBroker, storeService stores.Service) (*Impl, error) {
 	config := dodugo.NewConfiguration()
 	config.UserAgent = constants.UserAgent
 	apiClient := dodugo.NewAPIClient(config)
 
 	return &Impl{
-		dofusdudeClient: apiClient,
+		dofusDudeClient: apiClient,
+		storeService:    storeService,
 		broker:          broker,
-		httpTimeout:     time.Duration(viper.GetInt(constants.DofusDudeTimeout)) * time.Second,
+		httpTimeout:     viper.GetDuration(constants.DofusDudeTimeout),
 	}, nil
 }
 
@@ -36,20 +37,20 @@ func (service *Impl) Consume() error {
 	return service.broker.Consume(requestQueueName, service.consume)
 }
 
-func (service *Impl) consume(_ context.Context,
+func (service *Impl) consume(ctx context.Context,
 	message *amqp.RabbitMQMessage, correlationID string) {
 	//exhaustive:ignore Don't need to be exhaustive here since they will be handled by default case
 	switch message.Type {
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST:
-		service.almanaxRequest(message, correlationID)
+		service.almanaxRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST:
-		service.itemListRequest(message, correlationID)
+		service.itemListRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST:
-		service.itemRequest(message, correlationID)
+		service.itemRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_LIST_REQUEST:
-		service.setListRequest(message, correlationID)
+		service.setListRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_REQUEST:
-		service.setRequest(message, correlationID)
+		service.setRequest(ctx, message, correlationID)
 	default:
 		log.Warn().
 			Str(constants.LogCorrelationID, correlationID).

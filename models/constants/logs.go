@@ -7,6 +7,7 @@ const (
 	LogCorrelationID = "correlationID"
 	LogAnkamaID      = "ankamaID"
 	LogQueryID       = "queryID"
+	LogKey           = "key"
 
 	LogLevelFallback = zerolog.InfoLevel
 )
