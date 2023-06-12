@@ -5,6 +5,7 @@ import (
 
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 	"github.com/rs/zerolog/log"
 )
 
@@ -18,7 +19,18 @@ func (service *Impl) setListRequest(ctx context.Context, message *amqp.RabbitMQM
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get set list encyclopedia request received")
 
-	// TODO
+	dodugoSets, err := service.GetSetsSearch(ctx, request.Query, mappers.MapLanguage(message.Language))
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while calling DofusDude, returning failed request")
+		service.publishSetListAnswerFailed(correlationID, message.Language)
+		return
+	}
+
+	sets := mappers.MapSetList(dodugoSets)
+	service.publishSetListAnswerSuccess(sets, correlationID, message.Language)
 
 	service.publishSetListAnswerFailed(correlationID, message.Language)
 }
@@ -31,6 +43,7 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 	}
 
 	log.Info().Str(constants.LogCorrelationID, correlationID).
+		Str(constants.LogQueryID, request.Query).
 		Msgf("Get set encyclopedia request received")
 
 	// TODO

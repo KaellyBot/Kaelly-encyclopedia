@@ -51,6 +51,45 @@ func (service *Impl) GetItemsAllSearch(ctx context.Context, query, language stri
 	return items, nil
 }
 
+func (service *Impl) GetSetsSearch(ctx context.Context, query, language string) ([]dodugo.SetListEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var sets []dodugo.SetListEntry
+	key := buildDofusDudeKey(set, query, language)
+	err := service.storeService.Get(ctx, key, &sets)
+	if err != nil {
+		if errors.Is(err, cache.ErrCacheMiss) {
+			log.Info().
+				Str(constants.LogKey, key).
+				Msgf("Cannot find sets in cache, calling the API...")
+		} else {
+			log.Error().Err(err).
+				Str(constants.LogKey, key).
+				Msgf("Error while requesting sets in cache, calling the API instead...")
+		}
+
+		resp, r, err := service.dofusDudeClient.SetsApi.
+			GetSetsSearch(ctx, language, constants.DofusDudeGame).
+			Query(query).Limit(constants.DofusDudeLimit).Execute()
+
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		sets = resp
+
+		err = service.storeService.Set(ctx, key, sets)
+		if err != nil {
+			log.Error().Err(err).
+				Str(constants.LogKey, key).
+				Msgf("Error while putting sets in cache, no issue to retrieve sets anyway...")
+		}
+	}
+
+	return sets, nil
+}
+
 func buildDofusDudeKey(objType objectType, query, language string) string {
 	return fmt.Sprintf("%v/%v?query=%v&lg=%v", constants.GetEncyclopediasSource().Name,
 		objType, query, language)
