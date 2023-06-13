@@ -13,6 +13,7 @@ func GetLanguages() map[amqp.Language]string {
 		amqp.Language_ANY: DofusDudeDefaultLanguage,
 		amqp.Language_FR:  "fr",
 		amqp.Language_EN:  "en",
+		amqp.Language_ES:  "es",
 		amqp.Language_DE:  "de",
 	}
 }
