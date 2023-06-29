@@ -46,9 +46,21 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 		Str(constants.LogQueryID, request.Query).
 		Msgf("Get set encyclopedia request received")
 
-	// TODO
+	set, err := service.GetSet(ctx, request.Query, mappers.MapLanguage(message.Language))
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while calling DofusDude, returning failed request")
+		service.publishSetAnswerFailed(correlationID, message.Language)
+		return
+	}
 
-	service.publishSetAnswerFailed(correlationID, message.Language)
+	// TODO load items
+
+	answer := mappers.MapSet(set)
+
+	service.publishSetAnswerSuccess(answer, correlationID, message.Language)
 }
 
 func isValidSetListRequest(request *amqp.EncyclopediaSetListRequest) bool {
@@ -105,14 +117,12 @@ func (service *Impl) publishSetAnswerFailed(correlationID string, language amqp.
 	}
 }
 
-func (service *Impl) publishSetAnswerSuccess(correlationID string, language amqp.Language) {
+func (service *Impl) publishSetAnswerSuccess(set *amqp.EncyclopediaSetAnswer, correlationID string, language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:                  amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_ANSWER,
 		Status:                amqp.RabbitMQMessage_SUCCESS,
 		Language:              language,
-		EncyclopediaSetAnswer: &amqp.EncyclopediaSetAnswer{
-			// TODO
-		},
+		EncyclopediaSetAnswer: set,
 	}
 
 	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
