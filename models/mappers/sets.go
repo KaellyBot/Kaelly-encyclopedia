@@ -39,9 +39,10 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.Ency
 		}
 
 		equipments = append(equipments, &amqp.EncyclopediaSetAnswer_Equipment{
-			Id:   formattedItemIDString,
-			Name: item.GetName(),
-			Type: mapItemType(item.GetType()),
+			Id:    formattedItemIDString,
+			Name:  item.GetName(),
+			Level: int64(item.GetLevel()),
+			Type:  mapItemType(item.GetType()),
 		})
 	}
 
