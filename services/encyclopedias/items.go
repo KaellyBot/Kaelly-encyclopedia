@@ -20,7 +20,7 @@ func (service *Impl) itemListRequest(ctx context.Context, message *amqp.RabbitMQ
 		Str(constants.LogQueryID, request.Query).
 		Msgf("Get item list encyclopedia request received")
 
-	dodugoItems, err := service.GetItemsAllSearch(ctx, request.Query, mappers.MapLanguage(message.Language))
+	dodugoItems, err := service.searchItems(ctx, request.Query, mappers.MapLanguage(message.Language))
 	if err != nil {
 		log.Error().Err(err).
 			Str(constants.LogCorrelationID, correlationID).

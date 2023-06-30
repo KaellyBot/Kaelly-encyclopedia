@@ -1,6 +1,7 @@
 package encyclopedias
 
 import (
+	"errors"
 	"time"
 
 	"github.com/dofusdude/dodugo"
@@ -20,6 +21,10 @@ const (
 	almanax objectType = "almanax"
 	item    objectType = "items"
 	set     objectType = "sets"
+)
+
+var (
+	errNotFound = errors.New("cannot find the desired resource")
 )
 
 type Service interface {

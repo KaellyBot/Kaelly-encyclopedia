@@ -6,6 +6,7 @@ import (
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/rs/zerolog/log"
 )
 
 func MapSetList(dodugoSets []dodugo.SetListEntry) []*amqp.EncyclopediaSetListAnswer_Set {
@@ -21,12 +22,26 @@ func MapSetList(dodugoSets []dodugo.SetListEntry) []*amqp.EncyclopediaSetListAns
 	return sets
 }
 
-func MapSet(set *dodugo.EquipmentSet) *amqp.EncyclopediaSetAnswer {
+func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.EncyclopediaSetAnswer {
 	equipments := make([]*amqp.EncyclopediaSetAnswer_Equipment, 0)
-	for _, equipmentId := range set.GetEquipmentIds() {
+	for _, itemID := range set.GetEquipmentIds() {
+		formattedItemIDString := fmt.Sprintf("%v", itemID)
+		item, found := items[itemID]
+		if !found {
+			log.Warn().
+				Str(constants.LogAnkamaID, formattedItemIDString).
+				Msgf("Cannot build entire set (missing item), continuing with degraded mode")
+			missingItemID := itemID
+			item = &dodugo.Weapon{
+				AnkamaId: &missingItemID,
+				Name:     &formattedItemIDString,
+			}
+		}
+
 		equipments = append(equipments, &amqp.EncyclopediaSetAnswer_Equipment{
-			Id:   fmt.Sprintf("%v", equipmentId),
-			Name: fmt.Sprintf("%v", equipmentId), // TODO
+			Id:   formattedItemIDString,
+			Name: item.GetName(),
+			Type: mapItemType(item.GetType()),
 		})
 	}
 
@@ -49,13 +64,18 @@ func MapSet(set *dodugo.EquipmentSet) *amqp.EncyclopediaSetAnswer {
 	return &amqp.EncyclopediaSetAnswer{
 		Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
 		Name:       set.GetName(),
-		Level:      int64(set.GetLevel()), // TODO bug, does not work
+		Level:      int64(set.GetLevel()), // TODO bug
 		Equipments: equipments,
 		Bonuses:    bonuses,
-		Source: &amqp.EncyclopediaSetAnswer_Source{
+		Source: &amqp.Source{
 			Name: constants.GetEncyclopediasSource().Name,
 			Icon: constants.GetEncyclopediasSource().Icon,
 			Url:  constants.GetEncyclopediasSource().URL,
 		},
 	}
+}
+
+func mapItemType(itemType dodugo.ItemsListEntryTypedType) amqp.EquipmentType {
+	// TODO
+	return amqp.EquipmentType_SHIELD
 }

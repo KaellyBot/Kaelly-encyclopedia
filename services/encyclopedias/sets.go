@@ -2,7 +2,9 @@ package encyclopedias
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
@@ -19,7 +21,7 @@ func (service *Impl) setListRequest(ctx context.Context, message *amqp.RabbitMQM
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get set list encyclopedia request received")
 
-	dodugoSets, err := service.GetSetsSearch(ctx, request.Query, mappers.MapLanguage(message.Language))
+	dodugoSets, err := service.searchSets(ctx, request.Query, mappers.MapLanguage(message.Language))
 	if err != nil {
 		log.Error().Err(err).
 			Str(constants.LogCorrelationID, correlationID).
@@ -46,7 +48,8 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 		Str(constants.LogQueryID, request.Query).
 		Msgf("Get set encyclopedia request received")
 
-	set, err := service.GetSet(ctx, request.Query, mappers.MapLanguage(message.Language))
+	lg := mappers.MapLanguage(message.Language)
+	set, err := service.getSetByQuery(ctx, request.Query, lg)
 	if err != nil {
 		log.Error().Err(err).
 			Str(constants.LogCorrelationID, correlationID).
@@ -56,10 +59,21 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 		return
 	}
 
-	// TODO load items
+	items := make(map[int32]*dodugo.Weapon)
+	for _, itemID := range set.EquipmentIds {
+		item, errItem := service.getItemByID(ctx, itemID, lg)
+		if errItem != nil {
+			log.Error().Err(errItem).
+				Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogQueryID, request.Query).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", itemID)).
+				Msgf("Error while retrieving item with DofusDude, continuing without it")
+		} else {
+			items[itemID] = item
+		}
+	}
 
-	answer := mappers.MapSet(set)
-
+	answer := mappers.MapSet(set, items)
 	service.publishSetAnswerSuccess(answer, correlationID, message.Language)
 }
 
@@ -117,7 +131,8 @@ func (service *Impl) publishSetAnswerFailed(correlationID string, language amqp.
 	}
 }
 
-func (service *Impl) publishSetAnswerSuccess(set *amqp.EncyclopediaSetAnswer, correlationID string, language amqp.Language) {
+func (service *Impl) publishSetAnswerSuccess(set *amqp.EncyclopediaSetAnswer,
+	correlationID string, language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:                  amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_ANSWER,
 		Status:                amqp.RabbitMQMessage_SUCCESS,

@@ -2,13 +2,14 @@ package encyclopedias
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/dofusdude/dodugo"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 )
 
-func (service *Impl) GetItemsAllSearch(ctx context.Context, query,
+func (service *Impl) searchItems(ctx context.Context, query,
 	language string) ([]dodugo.ItemsListEntryTyped, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
@@ -30,7 +31,50 @@ func (service *Impl) GetItemsAllSearch(ctx context.Context, query,
 	return items, nil
 }
 
-func (service *Impl) GetSetsSearch(ctx context.Context, query,
+func (service *Impl) getItemByQuery(ctx context.Context, query, language string,
+) (*dodugo.Weapon, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	values, err := service.searchItems(ctx, query, language)
+	if err != nil {
+		return nil, err
+	}
+	if len(values) == 0 {
+		return nil, errNotFound
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	resp, err := service.getItemByID(ctx, values[0].GetAnkamaId(), language)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (service *Impl) getItemByID(ctx context.Context, itemID int32, language string,
+) (*dodugo.Weapon, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoItem *dodugo.Weapon
+	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoItem) {
+		resp, r, err := service.dofusDudeClient.EquipmentApi.
+			GetItemsEquipmentSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		dodugoItem = resp
+	}
+
+	return dodugoItem, nil
+}
+
+func (service *Impl) searchSets(ctx context.Context, query,
 	language string) ([]dodugo.SetListEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
@@ -52,25 +96,38 @@ func (service *Impl) GetSetsSearch(ctx context.Context, query,
 	return sets, nil
 }
 
-func (service *Impl) GetSet(ctx context.Context, query,
-	language string) (*dodugo.EquipmentSet, error) {
+func (service *Impl) getSetByQuery(ctx context.Context, query, language string,
+) (*dodugo.EquipmentSet, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	values, err := service.searchSets(ctx, query, language)
+	if err != nil {
+		return nil, err
+	}
+	if len(values) == 0 {
+		return nil, errNotFound
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	resp, err := service.getSetByID(ctx, values[0].GetAnkamaId(), language)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (service *Impl) getSetByID(ctx context.Context, setID int32, language string,
+) (*dodugo.EquipmentSet, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
 	var dodugoSet *dodugo.EquipmentSet
-	key := buildKey(set, query, language, constants.GetEncyclopediasSource().Name)
+	key := buildKey(set, fmt.Sprintf("%v", setID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoSet) {
-
-		// TODO determine Ankama ID
-		values, err := service.GetSetsSearch(ctx, query, language)
-		if err != nil {
-			return nil, err
-		}
-		var ankamaID int32 = *values[0].AnkamaId
-		// --------------------------
-
 		resp, r, err := service.dofusDudeClient.SetsApi.
-			GetSetsSingle(ctx, language, ankamaID, constants.DofusDudeGame).Execute()
+			GetSetsSingle(ctx, language, setID, constants.DofusDudeGame).Execute()
 		if err != nil && r.StatusCode != http.StatusNotFound {
 			return nil, err
 		}
