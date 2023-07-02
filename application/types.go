@@ -3,6 +3,7 @@ package application
 import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
+	"github.com/kaellybot/kaelly-encyclopedia/utils/databases"
 )
 
 type Application interface {
@@ -11,6 +12,7 @@ type Application interface {
 }
 
 type Impl struct {
-	encyclopediaService encyclopedias.Service
+	db                  databases.MySQLConnection
 	broker              amqp.MessageBroker
+	encyclopediaService encyclopedias.Service
 }

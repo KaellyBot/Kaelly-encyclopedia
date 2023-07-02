@@ -17,7 +17,7 @@ func (service *Impl) searchItems(ctx context.Context, query,
 	var items []dodugo.ItemsListEntryTyped
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
-		resp, r, err := service.dofusDudeClient.AllItemsApi.
+		resp, r, err := service.dofusDudeClient.AllItemsAPI.
 			GetItemsAllSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
 		if err != nil && r.StatusCode != http.StatusNotFound {
@@ -61,7 +61,7 @@ func (service *Impl) getItemByID(ctx context.Context, itemID int32, language str
 	var dodugoItem *dodugo.Weapon
 	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
-		resp, r, err := service.dofusDudeClient.EquipmentApi.
+		resp, r, err := service.dofusDudeClient.EquipmentAPI.
 			GetItemsEquipmentSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
 		if err != nil && r.StatusCode != http.StatusNotFound {
 			return nil, err
@@ -82,7 +82,7 @@ func (service *Impl) searchSets(ctx context.Context, query,
 	var sets []dodugo.SetListEntry
 	key := buildListKey(set, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &sets) {
-		resp, r, err := service.dofusDudeClient.SetsApi.
+		resp, r, err := service.dofusDudeClient.SetsAPI.
 			GetSetsSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
 		if err != nil && r.StatusCode != http.StatusNotFound {
@@ -126,7 +126,7 @@ func (service *Impl) getSetByID(ctx context.Context, setID int32, language strin
 	var dodugoSet *dodugo.EquipmentSet
 	key := buildKey(set, fmt.Sprintf("%v", setID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoSet) {
-		resp, r, err := service.dofusDudeClient.SetsApi.
+		resp, r, err := service.dofusDudeClient.SetsAPI.
 			GetSetsSingle(ctx, language, setID, constants.DofusDudeGame).Execute()
 		if err != nil && r.StatusCode != http.StatusNotFound {
 			return nil, err

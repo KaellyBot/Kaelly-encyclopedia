@@ -6,6 +6,7 @@ import (
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,7 +23,8 @@ func MapSetList(dodugoSets []dodugo.SetListEntry) []*amqp.EncyclopediaSetListAns
 	return sets
 }
 
-func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.EncyclopediaSetAnswer {
+func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
+	equipmentService equipments.Service) *amqp.EncyclopediaSetAnswer {
 	equipments := make([]*amqp.EncyclopediaSetAnswer_Equipment, 0)
 	for _, itemID := range set.GetEquipmentIds() {
 		formattedItemIDString := fmt.Sprintf("%v", itemID)
@@ -42,7 +44,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.Ency
 			Id:    formattedItemIDString,
 			Name:  item.GetName(),
 			Level: int64(item.GetLevel()),
-			Type:  mapItemType(item.GetType()),
+			Type:  mapItemType(item.GetType(), equipmentService),
 		})
 	}
 
@@ -65,7 +67,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.Ency
 	return &amqp.EncyclopediaSetAnswer{
 		Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
 		Name:       set.GetName(),
-		Level:      int64(set.GetLevel()), // TODO bug
+		Level:      int64(set.GetHighestEquipmentLevel()),
 		Equipments: equipments,
 		Bonuses:    bonuses,
 		Source: &amqp.Source{
@@ -76,7 +78,11 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon) *amqp.Ency
 	}
 }
 
-func mapItemType(itemType dodugo.ItemsListEntryTypedType) amqp.EquipmentType {
-	// TODO
-	return amqp.EquipmentType_SHIELD
+func mapItemType(itemType dodugo.ItemsListEntryTypedType,
+	equipmentService equipments.Service) amqp.EquipmentType {
+	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetId())
+	if !found {
+		return amqp.EquipmentType_NONE
+	}
+	return equipmentType.ID
 }

@@ -9,6 +9,18 @@ import (
 const (
 	ConfigFileName = ".env"
 
+	// MySQL URL with the following format: HOST:PORT.
+	MySQLURL = "MYSQL_URL"
+
+	// MySQL user.
+	MySQLUser = "MYSQL_USER"
+
+	// MySQL password.
+	MySQLPassword = "MYSQL_PASSWORD"
+
+	// MySQL database name.
+	MySQLDatabase = "MYSQL_DATABASE"
+
 	// RabbitMQ address.
 	RabbitMQAddress = "RABBITMQ_ADDRESS"
 
@@ -33,6 +45,10 @@ const (
 	// Boolean; used to register commands at development guild level or globally.
 	Production = "PRODUCTION"
 
+	defaultMySQLURL            = "localhost:3306"
+	defaultMySQLUser           = ""
+	defaultMySQLPassword       = ""
+	defaultMySQLDatabase       = "kaellybot"
 	defaultRabbitMQAddress     = "amqp://localhost:5672"
 	defaultRedisAddress        = "localhost:6379"
 	defaultRedisCacheRetention = 60 * time.Minute
@@ -45,6 +61,10 @@ const (
 
 func GetDefaultConfigValues() map[string]any {
 	return map[string]any{
+		MySQLURL:            defaultMySQLURL,
+		MySQLUser:           defaultMySQLUser,
+		MySQLPassword:       defaultMySQLPassword,
+		MySQLDatabase:       defaultMySQLDatabase,
 		RabbitMQAddress:     defaultRabbitMQAddress,
 		RedisAddress:        defaultRedisAddress,
 		RedisCacheRetention: defaultRedisCacheRetention,

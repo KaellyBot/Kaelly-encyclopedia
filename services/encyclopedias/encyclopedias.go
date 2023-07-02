@@ -6,21 +6,24 @@ import (
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-func New(broker amqp.MessageBroker, storeService stores.Service) (*Impl, error) {
+func New(broker amqp.MessageBroker, storeService stores.Service,
+	equipmentService equipments.Service) (*Impl, error) {
 	config := dodugo.NewConfiguration()
 	config.UserAgent = constants.UserAgent
 	apiClient := dodugo.NewAPIClient(config)
 
 	return &Impl{
-		dofusDudeClient: apiClient,
-		storeService:    storeService,
-		broker:          broker,
-		httpTimeout:     viper.GetDuration(constants.DofusDudeTimeout),
+		dofusDudeClient:  apiClient,
+		equipmentService: equipmentService,
+		storeService:     storeService,
+		broker:           broker,
+		httpTimeout:      viper.GetDuration(constants.DofusDudeTimeout),
 	}, nil
 }
 

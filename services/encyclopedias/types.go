@@ -6,6 +6,7 @@ import (
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 )
 
@@ -32,8 +33,9 @@ type Service interface {
 }
 
 type Impl struct {
-	dofusDudeClient *dodugo.APIClient
-	storeService    stores.Service
-	broker          amqp.MessageBroker
-	httpTimeout     time.Duration
+	dofusDudeClient  *dodugo.APIClient
+	equipmentService equipments.Service
+	storeService     stores.Service
+	broker           amqp.MessageBroker
+	httpTimeout      time.Duration
 }

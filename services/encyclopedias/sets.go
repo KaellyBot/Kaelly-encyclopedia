@@ -3,6 +3,7 @@ package encyclopedias
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -48,8 +49,24 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 		Str(constants.LogQueryID, request.Query).
 		Msgf("Get set encyclopedia request received")
 
+	var set *dodugo.EquipmentSet
+	var err error
 	lg := mappers.MapLanguage(message.Language)
-	set, err := service.getSetByQuery(ctx, request.Query, lg)
+	if request.GetIsID() {
+		ankamaID, err := strconv.Atoi(request.Query)
+		if err != nil {
+			log.Error().Err(err).
+				Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogQueryID, request.Query).
+				Msgf("Error while converting query as AnkamaID, returning failed request")
+			service.publishSetAnswerFailed(correlationID, message.Language)
+			return
+		}
+
+		set, err = service.getSetByID(ctx, int32(ankamaID), lg)
+	} else {
+		set, err = service.getSetByQuery(ctx, request.Query, lg)
+	}
 	if err != nil {
 		log.Error().Err(err).
 			Str(constants.LogCorrelationID, correlationID).
@@ -73,7 +90,7 @@ func (service *Impl) setRequest(ctx context.Context, message *amqp.RabbitMQMessa
 		}
 	}
 
-	answer := mappers.MapSet(set, items)
+	answer := mappers.MapSet(set, items, service.equipmentService)
 	service.publishSetAnswerSuccess(answer, correlationID, message.Language)
 }
 
