@@ -2,7 +2,10 @@ package encyclopedias
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
+	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
@@ -44,9 +47,51 @@ func (service *Impl) itemRequest(ctx context.Context, message *amqp.RabbitMQMess
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get item encyclopedia request received")
 
-	// TODO
+	var item *dodugo.Weapon
+	var err error
+	lg := mappers.MapLanguage(message.Language)
+	if request.GetIsID() {
+		ankamaID, err := strconv.Atoi(request.Query)
+		if err != nil {
+			log.Error().Err(err).
+				Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogQueryID, request.Query).
+				Msgf("Error while converting query as AnkamaID, returning failed request")
+			service.publishItemAnswerFailed(correlationID, message.Language)
+			return
+		}
 
-	service.publishItemAnswerFailed(correlationID, message.Language)
+		item, err = service.getItemByID(ctx, int32(ankamaID), lg)
+	} else {
+		item, err = service.getItemByQuery(ctx, request.Query, lg)
+	}
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while calling DofusDude, returning failed request")
+		service.publishItemAnswerFailed(correlationID, message.Language)
+		return
+	}
+
+	ingredients := make(map[int32]*dodugo.Weapon)
+	for _, ingredient := range item.Recipe {
+		itemID := ingredient.GetItemAnkamaId()
+		// TODO getItemByID depends of the searched type!
+		item, errItem := service.getItemByID(ctx, itemID, lg)
+		if errItem != nil {
+			log.Error().Err(errItem).
+				Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogQueryID, request.Query).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", itemID)).
+				Msgf("Error while retrieving item with DofusDude, continuing without it")
+		} else {
+			ingredients[itemID] = item
+		}
+	}
+
+	answer := mappers.MapItem(item, ingredients)
+	service.publishItemAnswerSuccess(answer, correlationID, message.Language)
 }
 
 func isValidItemListRequest(request *amqp.EncyclopediaItemListRequest) bool {
@@ -103,14 +148,13 @@ func (service *Impl) publishItemAnswerFailed(correlationID string, language amqp
 	}
 }
 
-func (service *Impl) publishItemAnswerSuccess(correlationID string, language amqp.Language) {
+func (service *Impl) publishItemAnswerSuccess(answer *amqp.EncyclopediaItemAnswer,
+	correlationID string, language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:                   amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
 		Status:                 amqp.RabbitMQMessage_SUCCESS,
 		Language:               language,
-		EncyclopediaItemAnswer: &amqp.EncyclopediaItemAnswer{
-			// TODO
-		},
+		EncyclopediaItemAnswer: answer,
 	}
 
 	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)

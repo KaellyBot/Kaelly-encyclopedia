@@ -54,7 +54,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 		for _, effect := range bonus {
 			effects = append(effects, &amqp.EncyclopediaSetAnswer_Effect{
 				Id:    fmt.Sprintf("%v", *effect.GetType().Id),
-				Label: *effect.Formatted,
+				Label: effect.GetFormatted(),
 			})
 		}
 
@@ -76,13 +76,4 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			Url:  constants.GetEncyclopediasSource().URL,
 		},
 	}
-}
-
-func mapItemType(itemType dodugo.ItemsListEntryTypedType,
-	equipmentService equipments.Service) amqp.EquipmentType {
-	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetId())
-	if !found {
-		return amqp.EquipmentType_NONE
-	}
-	return equipmentType.ID
 }
