@@ -39,8 +39,9 @@ func MapItem(item *dodugo.Weapon, ingredientItems map[int32]*dodugo.Weapon,
 	effects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
 	for _, effect := range item.GetEffects() {
 		effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
-			Id:    fmt.Sprintf("%v", *effect.GetType().Id),
-			Label: effect.GetFormatted(),
+			Id:       fmt.Sprintf("%v", *effect.GetType().Id),
+			Label:    effect.GetFormatted(),
+			IsActive: *effect.GetType().IsActive,
 		})
 	}
 

@@ -55,6 +55,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			effects = append(effects, &amqp.EncyclopediaSetAnswer_Effect{
 				Id:    fmt.Sprintf("%v", *effect.GetType().Id),
 				Label: effect.GetFormatted(),
+				IsActive: *effect.GetType().IsActive,
 			})
 		}
 
