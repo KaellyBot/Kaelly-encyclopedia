@@ -2,6 +2,7 @@ package stores
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/go-redis/cache/v8"
@@ -25,14 +26,25 @@ func New() *Impl {
 }
 
 func (service *Impl) Get(ctx context.Context, key string, value any) error {
-	return service.cache.Get(ctx, buildKey(key), value)
+	var jsonValue []byte
+	err := service.cache.Get(ctx, buildKey(key), &jsonValue)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(jsonValue, value)
 }
 
 func (service *Impl) Set(ctx context.Context, key string, value any) error {
+	jsonValue, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+
 	return service.cache.Set(&cache.Item{
 		Ctx:   ctx,
 		Key:   buildKey(key),
-		Value: value,
+		Value: jsonValue,
 	})
 }
 

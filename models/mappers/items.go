@@ -75,8 +75,8 @@ func MapItem(item *dodugo.Weapon, ingredientItems map[int32]*dodugo.Weapon,
 	}
 
 	icon := item.GetImageUrls().Icon
-	if item.GetImageUrls().Hd.IsSet() {
-		icon = item.GetImageUrls().Hd.Get()
+	if item.GetImageUrls().Hq.IsSet() {
+		icon = item.GetImageUrls().Hq.Get()
 	}
 
 	return &amqp.EncyclopediaItemAnswer{
