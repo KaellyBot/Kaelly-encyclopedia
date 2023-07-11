@@ -27,11 +27,30 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 			GetItemByID:    service.getItemByID,
 			GetItemByQuery: service.getItemByQuery,
 		},
+		amqp.ItemType_CONSUMABLE: {
+			GetItemByID:    service.getConsumableByID,
+			GetItemByQuery: service.getConsumableByQuery,
+		},
+		amqp.ItemType_COSMETIC: {
+			GetItemByID:    service.getCosmeticByID,
+			GetItemByQuery: service.getCosmeticByQuery,
+		},
 		amqp.ItemType_EQUIPMENT: {
 			GetItemByID:    service.getEquipmentByID,
 			GetItemByQuery: service.getEquipmentByQuery,
 		},
-		// TODO do others too
+		amqp.ItemType_MOUNT: {
+			GetItemByID:    service.getMountByID,
+			GetItemByQuery: service.getMountByQuery,
+		},
+		amqp.ItemType_QUEST_ITEM: {
+			GetItemByID:    service.getQuestItemByID,
+			GetItemByQuery: service.getQuestItemByQuery,
+		},
+		amqp.ItemType_RESOURCE: {
+			GetItemByID:    service.getResourceByID,
+			GetItemByQuery: service.getResourceByQuery,
+		},
 		amqp.ItemType_SET: {
 			GetItemByID:    service.getSetByID,
 			GetItemByQuery: service.getSetByQuery,

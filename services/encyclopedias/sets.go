@@ -11,9 +11,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) getSetByID(ctx context.Context, ID int32, correlationID,
+func (service *Impl) getSetByID(ctx context.Context, id int32, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
-	set, err := service.sourceService.GetSetByID(ctx, ID, lg)
+	set, err := service.sourceService.GetSetByID(ctx, id, lg)
 	if err != nil {
 		return nil, err
 	}

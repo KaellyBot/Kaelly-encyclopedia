@@ -39,9 +39,10 @@ func (service *Impl) itemRequest(ctx context.Context,
 	var reply *amqp.EncyclopediaItemAnswer
 	var err error
 	if request.GetIsID() {
-		ankamaID, err := strconv.Atoi(request.Query)
-		if err != nil {
-			log.Error().Str(constants.LogCorrelationID, correlationID).
+		ankamaID, errID := strconv.ParseInt(request.Query, 10, 32)
+		if errID != nil {
+			log.Error().Err(errID).
+				Str(constants.LogCorrelationID, correlationID).
 				Str(constants.LogQueryID, request.Query).
 				Str(constants.LogQueryType, request.GetType().String()).
 				Msgf("Error while converting query as ankamaID, returning failed request")
@@ -50,7 +51,6 @@ func (service *Impl) itemRequest(ctx context.Context,
 		}
 
 		reply, err = funcs.GetItemByID(ctx, int32(ankamaID), correlationID, lg)
-
 	} else {
 		reply, err = funcs.GetItemByQuery(ctx, request.Query, correlationID, lg)
 	}
@@ -68,17 +68,38 @@ func (service *Impl) itemRequest(ctx context.Context,
 	service.publishItemAnswerSuccess(reply, correlationID, message.Language)
 }
 
-func (service *Impl) getItemByID(ctx context.Context, ID int32, correlationID,
+func (service *Impl) getItemByID(ctx context.Context, id int32, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
 	return nil, errBadRequestMessage
 }
 
 func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
-
 	// TODO swith case reply
 
-	return nil, nil
+	return &amqp.EncyclopediaItemAnswer{}, nil
+}
+
+func (service *Impl) getQuestItemByID(ctx context.Context, id int32, correlationID,
+	lg string) (*amqp.EncyclopediaItemAnswer, error) {
+	questItem, err := service.sourceService.GetQuestItemByID(ctx, id, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	ingredients := service.getIngredients(ctx, questItem.GetRecipe(), correlationID, lg)
+	return mappers.MapQuestItem(questItem, ingredients), nil
+}
+
+func (service *Impl) getQuestItemByQuery(ctx context.Context, query, correlationID,
+	lg string) (*amqp.EncyclopediaItemAnswer, error) {
+	questItem, err := service.sourceService.GetQuestItemByQuery(ctx, query, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	ingredients := service.getIngredients(ctx, questItem.GetRecipe(), correlationID, lg)
+	return mappers.MapQuestItem(questItem, ingredients), nil
 }
 
 func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeEntry,
@@ -102,7 +123,6 @@ func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeE
 
 func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.RecipeEntry,
 	correlationID, lg string) (constants.Ingredient, error) {
-
 	// TODO switch case with consumable, equipment, resources, quest items
 
 	return constants.Ingredient{}, nil

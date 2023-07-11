@@ -7,9 +7,9 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 )
 
-func (service *Impl) getEquipmentByID(ctx context.Context, ID int32, correlationID,
+func (service *Impl) getEquipmentByID(ctx context.Context, id int32, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
-	equipment, err := service.sourceService.GetEquipmentByID(ctx, ID, lg)
+	equipment, err := service.sourceService.GetEquipmentByID(ctx, id, lg)
 	if err != nil {
 		return nil, err
 	}

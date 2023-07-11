@@ -11,7 +11,6 @@ import (
 
 func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
-
 	// TODO the rest
 
 	var set *amqp.EncyclopediaItemAnswer_Equipment_Set
@@ -43,7 +42,6 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]constants.Ingre
 					Str(constants.LogAnkamaID, formattedItemIDString).
 					Msgf("Cannot build entire recipe (missing ingredient), continuing with degraded mode")
 				ingredient = constants.Ingredient{
-					ID:   formattedItemIDString,
 					Name: formattedItemIDString,
 					Type: amqp.ItemType_ANY_ITEM,
 				}

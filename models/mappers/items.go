@@ -5,6 +5,7 @@ import (
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 )
 
@@ -20,6 +21,21 @@ func MapItemList(dodugoItems []dodugo.ItemsListEntryTyped) *amqp.EncyclopediaIte
 
 	return &amqp.EncyclopediaItemListAnswer{
 		Items: items,
+	}
+}
+
+func MapQuestItem(item *dodugo.Resource, ingredientItems map[int32]constants.Ingredient,
+) *amqp.EncyclopediaItemAnswer {
+	// TODO
+
+	return &amqp.EncyclopediaItemAnswer{
+		Type:      amqp.ItemType_QUEST_ITEM,
+		QuestItem: &amqp.EncyclopediaItemAnswer_QuestItem{},
+		Source: &amqp.Source{
+			Name: constants.GetEncyclopediasSource().Name,
+			Icon: constants.GetEncyclopediasSource().Icon,
+			Url:  constants.GetEncyclopediasSource().URL,
+		},
 	}
 }
 

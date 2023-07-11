@@ -47,7 +47,7 @@ func (service *Impl) itemListRequest(ctx context.Context,
 	service.publishItemListAnswerSuccess(reply, correlationID, message.Language)
 }
 
-func (service *Impl) getItemList(ctx context.Context, query, correlationID,
+func (service *Impl) getItemList(ctx context.Context, query, _,
 	lg string) (*amqp.EncyclopediaItemListAnswer, error) {
 	dodugoItems, err := service.sourceService.SearchAnyItems(ctx, query, lg)
 	if err != nil {
@@ -57,7 +57,7 @@ func (service *Impl) getItemList(ctx context.Context, query, correlationID,
 	return mappers.MapItemList(dodugoItems), nil
 }
 
-func (service *Impl) getSetList(ctx context.Context, query, correlationID,
+func (service *Impl) getSetList(ctx context.Context, query, _,
 	lg string) (*amqp.EncyclopediaItemListAnswer, error) {
 	dodugoSets, err := service.sourceService.SearchSets(ctx, query, lg)
 	if err != nil {

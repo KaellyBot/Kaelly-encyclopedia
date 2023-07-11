@@ -28,7 +28,7 @@ func New(repository repository.Repository) (*Impl, error) {
 	}, nil
 }
 
-func (service *Impl) GetTypeByDofusDude(ID int32) (entities.EquipmentType, bool) {
-	item, found := service.dofusDudeTypes[ID]
+func (service *Impl) GetTypeByDofusDude(id int32) (entities.EquipmentType, bool) {
+	item, found := service.dofusDudeTypes[id]
 	return item, found
 }
