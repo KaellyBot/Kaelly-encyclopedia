@@ -3,28 +3,41 @@ package encyclopedias
 import (
 	"context"
 
-	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
-	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
-func New(broker amqp.MessageBroker, storeService stores.Service,
-	equipmentService equipments.Service) (*Impl, error) {
-	config := dodugo.NewConfiguration()
-	config.UserAgent = constants.UserAgent
-	apiClient := dodugo.NewAPIClient(config)
-
-	return &Impl{
-		dofusDudeClient:  apiClient,
+func New(broker amqp.MessageBroker, sourceService sources.Service,
+	equipmentService equipments.Service) *Impl {
+	service := Impl{
+		sourceService:    sourceService,
 		equipmentService: equipmentService,
-		storeService:     storeService,
 		broker:           broker,
-		httpTimeout:      viper.GetDuration(constants.DofusDudeTimeout),
-	}, nil
+	}
+	service.getItemListByFunc = map[amqp.EncyclopediaItemListRequest_Type]getItemListFunc{
+		amqp.EncyclopediaItemListRequest_ANY: service.getItemList,
+		amqp.EncyclopediaItemListRequest_SET: service.getSetList,
+	}
+
+	service.getItemByFuncs = map[amqp.ItemType]getItemFuncs{
+		amqp.ItemType_ANY_ITEM: {
+			GetItemByID:    service.getItemByID,
+			GetItemByQuery: service.getItemByQuery,
+		},
+		amqp.ItemType_EQUIPMENT: {
+			GetItemByID:    service.getEquipmentByID,
+			GetItemByQuery: service.getEquipmentByQuery,
+		},
+		// TODO do others too
+		amqp.ItemType_SET: {
+			GetItemByID:    service.getSetByID,
+			GetItemByQuery: service.getSetByQuery,
+		},
+	}
+	return &service
 }
 
 func GetBinding() amqp.Binding {
@@ -50,10 +63,6 @@ func (service *Impl) consume(ctx context.Context,
 		service.itemListRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST:
 		service.itemRequest(ctx, message, correlationID)
-	case amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_LIST_REQUEST:
-		service.setListRequest(ctx, message, correlationID)
-	case amqp.RabbitMQMessage_ENCYCLOPEDIA_SET_REQUEST:
-		service.setRequest(ctx, message, correlationID)
 	default:
 		log.Warn().
 			Str(constants.LogCorrelationID, correlationID).

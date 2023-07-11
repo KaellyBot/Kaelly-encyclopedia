@@ -1,4 +1,4 @@
-package encyclopedias
+package sources
 
 import (
 	"context"

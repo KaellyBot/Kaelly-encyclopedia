@@ -1,4 +1,4 @@
-package encyclopedias
+package sources
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 )
 
-func (service *Impl) searchItems(ctx context.Context, query,
+func (service *Impl) SearchAnyItems(ctx context.Context, query,
 	language string) ([]dodugo.ItemsListEntryTyped, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
@@ -31,12 +31,34 @@ func (service *Impl) searchItems(ctx context.Context, query,
 	return items, nil
 }
 
-func (service *Impl) getItemByQuery(ctx context.Context, query, language string,
+func (service *Impl) SearchEquipments(ctx context.Context, query,
+	language string) ([]dodugo.ItemListEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var items []dodugo.ItemListEntry
+	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &items) {
+		resp, r, err := service.dofusDudeClient.EquipmentAPI.
+			GetItemsEquipmentSearch(ctx, language, constants.DofusDudeGame).
+			Query(query).Limit(constants.DofusDudeLimit).Execute()
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		items = resp
+	}
+
+	return items, nil
+}
+
+func (service *Impl) GetEquipmentByQuery(ctx context.Context, query, language string,
 ) (*dodugo.Weapon, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	values, err := service.searchItems(ctx, query, language)
+	values, err := service.SearchEquipments(ctx, query, language)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +67,7 @@ func (service *Impl) getItemByQuery(ctx context.Context, query, language string,
 	}
 
 	// We trust the omnisearch by taking the first one in the list
-	resp, err := service.getItemByID(ctx, values[0].GetAnkamaId(), language)
+	resp, err := service.GetEquipmentByID(ctx, values[0].GetAnkamaId(), language)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +75,7 @@ func (service *Impl) getItemByQuery(ctx context.Context, query, language string,
 	return resp, nil
 }
 
-func (service *Impl) getItemByID(ctx context.Context, itemID int32, language string,
+func (service *Impl) GetEquipmentByID(ctx context.Context, itemID int32, language string,
 ) (*dodugo.Weapon, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
@@ -74,7 +96,7 @@ func (service *Impl) getItemByID(ctx context.Context, itemID int32, language str
 	return dodugoItem, nil
 }
 
-func (service *Impl) searchSets(ctx context.Context, query,
+func (service *Impl) SearchSets(ctx context.Context, query,
 	language string) ([]dodugo.SetListEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
@@ -96,12 +118,12 @@ func (service *Impl) searchSets(ctx context.Context, query,
 	return sets, nil
 }
 
-func (service *Impl) getSetByQuery(ctx context.Context, query, language string,
+func (service *Impl) GetSetByQuery(ctx context.Context, query, language string,
 ) (*dodugo.EquipmentSet, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	values, err := service.searchSets(ctx, query, language)
+	values, err := service.SearchSets(ctx, query, language)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +132,7 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, language string,
 	}
 
 	// We trust the omnisearch by taking the first one in the list
-	resp, err := service.getSetByID(ctx, values[0].GetAnkamaId(), language)
+	resp, err := service.GetSetByID(ctx, values[0].GetAnkamaId(), language)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +140,7 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, language string,
 	return resp, nil
 }
 
-func (service *Impl) getSetByID(ctx context.Context, setID int32, language string,
+func (service *Impl) GetSetByID(ctx context.Context, setID int32, language string,
 ) (*dodugo.EquipmentSet, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()

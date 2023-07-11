@@ -10,22 +10,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapSetList(dodugoSets []dodugo.SetListEntry) []*amqp.EncyclopediaSetListAnswer_Set {
-	sets := make([]*amqp.EncyclopediaSetListAnswer_Set, 0)
+func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaItemListAnswer {
+	sets := make([]*amqp.EncyclopediaItemListAnswer_Item, 0)
 
 	for _, set := range dodugoSets {
-		sets = append(sets, &amqp.EncyclopediaSetListAnswer_Set{
+		sets = append(sets, &amqp.EncyclopediaItemListAnswer_Item{
 			Id:   fmt.Sprintf("%v", set.GetAnkamaId()),
 			Name: set.GetName(),
 		})
 	}
 
-	return sets
+	return &amqp.EncyclopediaItemListAnswer{
+		Items: sets,
+	}
 }
 
 func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
-	equipmentService equipments.Service) *amqp.EncyclopediaSetAnswer {
-	equipments := make([]*amqp.EncyclopediaSetAnswer_Equipment, 0)
+	equipmentService equipments.Service) *amqp.EncyclopediaItemAnswer {
+	equipments := make([]*amqp.EncyclopediaItemAnswer_Set_Equipment, 0)
 	for _, itemID := range set.GetEquipmentIds() {
 		formattedItemIDString := fmt.Sprintf("%v", itemID)
 		item, found := items[itemID]
@@ -40,7 +42,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			}
 		}
 
-		equipments = append(equipments, &amqp.EncyclopediaSetAnswer_Equipment{
+		equipments = append(equipments, &amqp.EncyclopediaItemAnswer_Set_Equipment{
 			Id:    formattedItemIDString,
 			Name:  item.GetName(),
 			Level: int64(item.GetLevel()),
@@ -48,29 +50,32 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 		})
 	}
 
-	bonuses := make([]*amqp.EncyclopediaSetAnswer_Bonus, 0)
+	bonuses := make([]*amqp.EncyclopediaItemAnswer_Set_Bonus, 0)
 	for i, bonus := range set.GetEffects() {
-		effects := make([]*amqp.EncyclopediaSetAnswer_Effect, 0)
+		effects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
 		for _, effect := range bonus {
-			effects = append(effects, &amqp.EncyclopediaSetAnswer_Effect{
-				Id:    fmt.Sprintf("%v", *effect.GetType().Id),
-				Label: effect.GetFormatted(),
+			effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
+				Id:       fmt.Sprintf("%v", *effect.GetType().Id),
+				Label:    effect.GetFormatted(),
 				IsActive: *effect.GetType().IsActive,
 			})
 		}
 
-		bonuses = append(bonuses, &amqp.EncyclopediaSetAnswer_Bonus{
+		bonuses = append(bonuses, &amqp.EncyclopediaItemAnswer_Set_Bonus{
 			ItemNumber: int64(i + constants.MinimumSetBonusItems),
 			Effects:    effects,
 		})
 	}
 
-	return &amqp.EncyclopediaSetAnswer{
-		Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
-		Name:       set.GetName(),
-		Level:      int64(set.GetHighestEquipmentLevel()),
-		Equipments: equipments,
-		Bonuses:    bonuses,
+	return &amqp.EncyclopediaItemAnswer{
+		Type: amqp.ItemType_SET,
+		Set: &amqp.EncyclopediaItemAnswer_Set{
+			Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
+			Name:       set.GetName(),
+			Level:      int64(set.GetHighestEquipmentLevel()),
+			Equipments: equipments,
+			Bonuses:    bonuses,
+		},
 		Source: &amqp.Source{
 			Name: constants.GetEncyclopediasSource().Name,
 			Icon: constants.GetEncyclopediasSource().Icon,

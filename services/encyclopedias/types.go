@@ -1,13 +1,12 @@
 package encyclopedias
 
 import (
+	"context"
 	"errors"
-	"time"
 
-	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
-	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
 const (
@@ -16,26 +15,30 @@ const (
 	answersRoutingkey  = "answers.encyclopedias"
 )
 
-type objectType string
-
-const (
-	almanax objectType = "almanax"
-	item    objectType = "items"
-	set     objectType = "sets"
-)
-
 var (
-	errNotFound = errors.New("cannot find the desired resource")
+	errBadRequestMessage = errors.New("message request could not be satisfied")
 )
+
+type getItemByIDFunc func(ctx context.Context, ID int32, correlationID,
+	lg string) (*amqp.EncyclopediaItemAnswer, error)
+type getItemByQueryFunc func(ctx context.Context, query, correlationID,
+	lg string) (*amqp.EncyclopediaItemAnswer, error)
+type getItemListFunc func(ctx context.Context, query, correlationID,
+	lg string) (*amqp.EncyclopediaItemListAnswer, error)
+
+type getItemFuncs struct {
+	GetItemByID    getItemByIDFunc
+	GetItemByQuery getItemByQueryFunc
+}
 
 type Service interface {
 	Consume() error
 }
 
 type Impl struct {
-	dofusDudeClient  *dodugo.APIClient
-	equipmentService equipments.Service
-	storeService     stores.Service
-	broker           amqp.MessageBroker
-	httpTimeout      time.Duration
+	sourceService     sources.Service
+	equipmentService  equipments.Service
+	broker            amqp.MessageBroker
+	getItemByFuncs    map[amqp.ItemType]getItemFuncs
+	getItemListByFunc map[amqp.EncyclopediaItemListRequest_Type]getItemListFunc
 }

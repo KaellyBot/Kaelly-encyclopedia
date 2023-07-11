@@ -7,6 +7,8 @@ const (
 	LogCorrelationID = "correlationID"
 	LogAnkamaID      = "ankamaID"
 	LogQueryID       = "queryID"
+	LogQueryType     = "queryType"
+	LogItemType      = "itemType"
 	LogEntityCount   = "entityCount"
 	LogKey           = "key"
 

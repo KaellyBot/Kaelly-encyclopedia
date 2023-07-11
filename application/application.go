@@ -6,6 +6,7 @@ import (
 	equipmentRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/kaellybot/kaelly-encyclopedia/utils/databases"
 	"github.com/rs/zerolog/log"
@@ -35,10 +36,12 @@ func New() (*Impl, error) {
 		return nil, err
 	}
 
-	encyclopediaService, err := encyclopedias.New(broker, storeService, equipmentService)
+	sourceService, err := sources.New(storeService)
 	if err != nil {
 		return nil, err
 	}
+
+	encyclopediaService := encyclopedias.New(broker, sourceService, equipmentService)
 
 	return &Impl{
 		db:                  db,
