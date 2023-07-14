@@ -24,7 +24,7 @@ func MapItemList(dodugoItems []dodugo.ItemsListEntryTyped) *amqp.EncyclopediaIte
 	}
 }
 
-func MapQuestItem(item *dodugo.Resource, ingredientItems map[int32]constants.Ingredient,
+func MapQuestItem(item *dodugo.Resource, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
 	// TODO
 

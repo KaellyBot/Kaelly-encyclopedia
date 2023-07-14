@@ -6,8 +6,22 @@ import (
 	"net/http"
 
 	"github.com/dofusdude/dodugo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/rs/zerolog/log"
 )
+
+func (service *Impl) GetItemType(itemType string) amqp.ItemType {
+	amqpItemType, found := service.itemTypes[itemType]
+	if !found {
+		log.Warn().
+			Str(constants.LogItemType, itemType).
+			Msgf("Cannot find dofusDude itemType match, returning amqp.ItemType_ANY_ITEM")
+		return amqp.ItemType_ANY_ITEM
+	}
+
+	return amqpItemType
+}
 
 func (service *Impl) SearchAnyItems(ctx context.Context, query,
 	language string) ([]dodugo.ItemsListEntryTyped, error) {
@@ -63,7 +77,7 @@ func (service *Impl) GetConsumableByQuery(ctx context.Context, query, language s
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -128,7 +142,7 @@ func (service *Impl) GetCosmeticByQuery(ctx context.Context, query, language str
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -193,7 +207,7 @@ func (service *Impl) GetEquipmentByQuery(ctx context.Context, query, language st
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -258,7 +272,7 @@ func (service *Impl) GetMountByQuery(ctx context.Context, query, language string
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -323,7 +337,7 @@ func (service *Impl) GetQuestItemByQuery(ctx context.Context, query, language st
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -388,7 +402,7 @@ func (service *Impl) GetResourceByQuery(ctx context.Context, query, language str
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list
@@ -453,7 +467,7 @@ func (service *Impl) GetSetByQuery(ctx context.Context, query, language string,
 		return nil, err
 	}
 	if len(values) == 0 {
-		return nil, errNotFound
+		return nil, ErrNotFound
 	}
 
 	// We trust the omnisearch by taking the first one in the list

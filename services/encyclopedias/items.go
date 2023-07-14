@@ -9,6 +9,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
@@ -75,9 +76,30 @@ func (service *Impl) getItemByID(ctx context.Context, id int32, correlationID,
 
 func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
-	// TODO swith case reply
 
-	return &amqp.EncyclopediaItemAnswer{}, nil
+	values, err := service.sourceService.SearchAnyItems(ctx, query, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(values) == 0 {
+		return nil, sources.ErrNotFound
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	item := values[0]
+	itemType := service.sourceService.GetItemType(item.GetItemSubtype())
+	funcs, found := service.getItemByFuncs[itemType]
+	if !found {
+		return nil, sources.ErrNotFound
+	}
+
+	resp, err := funcs.GetItemByID(ctx, item.GetAnkamaId(), correlationID, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (service *Impl) getQuestItemByID(ctx context.Context, id int32, correlationID,
@@ -102,9 +124,23 @@ func (service *Impl) getQuestItemByQuery(ctx context.Context, query, correlation
 	return mappers.MapQuestItem(questItem, ingredients), nil
 }
 
+func (service *Impl) getQuestItemIngredientByID(ctx context.Context, id int32, correlationID,
+	lg string) (*constants.Ingredient, error) {
+	consumable, err := service.sourceService.GetQuestItemByID(ctx, id, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &constants.Ingredient{
+		ID:   fmt.Sprintf("%v", id),
+		Name: consumable.GetName(),
+		Type: amqp.ItemType_QUEST_ITEM,
+	}, nil
+}
+
 func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeEntry,
-	correlationID, lg string) map[int32]constants.Ingredient {
-	ingredients := make(map[int32]constants.Ingredient)
+	correlationID, lg string) map[int32]*constants.Ingredient {
+	ingredients := make(map[int32]*constants.Ingredient)
 	for _, ingredient := range recipe {
 		itemID := ingredient.GetItemAnkamaId()
 		item, errItem := service.getIngredient(ctx, ingredient, correlationID, lg)
@@ -122,10 +158,19 @@ func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeE
 }
 
 func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.RecipeEntry,
-	correlationID, lg string) (constants.Ingredient, error) {
-	// TODO switch case with consumable, equipment, resources, quest items
+	correlationID, lg string) (*constants.Ingredient, error) {
+	itemType := service.sourceService.GetItemType(ingredient.GetItemSubtype())
+	funcs, found := service.getItemByFuncs[itemType]
+	if !found {
+		return nil, sources.ErrNotFound
+	}
 
-	return constants.Ingredient{}, nil
+	resp, err := funcs.GetIngredientByID(ctx, ingredient.GetItemAnkamaId(), correlationID, lg)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 func (service *Impl) publishItemAnswerFailed(correlationID string, language amqp.Language) {

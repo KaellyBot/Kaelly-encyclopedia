@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dofusdude/dodugo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 )
 
@@ -18,10 +19,12 @@ const (
 )
 
 var (
-	errNotFound = errors.New("cannot find the desired resource")
+	ErrNotFound = errors.New("cannot find the desired resource")
 )
 
 type Service interface {
+	GetItemType(itemType string) amqp.ItemType
+
 	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.ItemsListEntryTyped, error)
 	SearchConsumables(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchCosmetics(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
@@ -52,4 +55,5 @@ type Impl struct {
 	dofusDudeClient *dodugo.APIClient
 	storeService    stores.Service
 	httpTimeout     time.Duration
+	itemTypes       map[string]amqp.ItemType
 }

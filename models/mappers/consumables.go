@@ -6,7 +6,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 )
 
-func MapConsumable(item *dodugo.Resource, ingredientItems map[int32]constants.Ingredient,
+func MapConsumable(item *dodugo.Resource, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
 	// TODO
 

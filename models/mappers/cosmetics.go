@@ -6,7 +6,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 )
 
-func MapCosmetic(item *dodugo.Cosmetic, ingredientItems map[int32]constants.Ingredient,
+func MapCosmetic(item *dodugo.Cosmetic, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
 	// TODO
 

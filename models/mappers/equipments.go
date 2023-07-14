@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]constants.Ingredient,
+func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
 	// TODO the rest
 
@@ -41,7 +41,7 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]constants.Ingre
 				log.Warn().
 					Str(constants.LogAnkamaID, formattedItemIDString).
 					Msgf("Cannot build entire recipe (missing ingredient), continuing with degraded mode")
-				ingredient = constants.Ingredient{
+				ingredient = &constants.Ingredient{
 					Name: formattedItemIDString,
 					Type: amqp.ItemType_ANY_ITEM,
 				}
