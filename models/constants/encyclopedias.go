@@ -8,8 +8,8 @@ type Source struct {
 
 func GetEncyclopediasSource() Source {
 	return Source{
-		Name: "Dofusdude",
-		Icon: "https://docs.dofusdu.de/favicon-32x32.jpg",
-		URL:  "http://dofusdu.de",
+		Name: "dofusdude",
+		Icon: "https://docs.dofusdu.de/favicon-96x96.png",
+		URL:  "https://github.com/dofusdude",
 	}
 }
