@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -498,4 +499,55 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int32, language strin
 	}
 
 	return dodugoSet, nil
+}
+
+func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,
+	language string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var effects []dodugo.GetMetaAlmanaxBonuses200ResponseInner
+	key := buildListKey(almanaxEffect, query, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &effects) {
+		resp, r, err := service.dofusDudeClient.MetaAPI.
+			GetMetaAlmanaxBonuses(ctx, language).
+			// TODO a query is needed /Query(query).Limit(constants.DofusDudeLimit).
+			Execute()
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		effects = resp
+	}
+
+	return effects, nil
+}
+
+func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, language string,
+) (*dodugo.AlmanaxEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoAlmanax *dodugo.AlmanaxEntry
+	dodugoAlmanaxDate := date.Format(constants.DofusDudeAlmanaxDateFormat)
+	key := buildKey(almanax, dodugoAlmanaxDate, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
+		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
+			GetAlmanaxDate(ctx, language, dodugoAlmanaxDate).Execute()
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		dodugoAlmanax = resp
+	}
+
+	if dodugoAlmanax == nil {
+		log.Warn().
+			Str(constants.LogDate, dodugoAlmanaxDate).
+			Msgf("DofusDude API returns 404 NOT_FOUND for specific date, continuing with nil almanax...")
+	}
+
+	return dodugoAlmanax, nil
 }

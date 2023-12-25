@@ -10,17 +10,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaItemListAnswer {
-	sets := make([]*amqp.EncyclopediaItemListAnswer_Item, 0)
+func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaListAnswer {
+	sets := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, set := range dodugoSets {
-		sets = append(sets, &amqp.EncyclopediaItemListAnswer_Item{
+		sets = append(sets, &amqp.EncyclopediaListAnswer_Item{
 			Id:   fmt.Sprintf("%v", set.GetAnkamaId()),
 			Name: set.GetName(),
 		})
 	}
 
-	return &amqp.EncyclopediaItemListAnswer{
+	return &amqp.EncyclopediaListAnswer{
 		Items: sets,
 	}
 }
@@ -76,10 +76,6 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			Equipments: equipments,
 			Bonuses:    bonuses,
 		},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }

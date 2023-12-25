@@ -2,13 +2,13 @@ module github.com/kaellybot/kaelly-encyclopedia
 
 go 1.20
 
-// replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
+//replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
 	github.com/dofusdude/dodugo v0.7.2
 	github.com/go-redis/cache/v8 v8.4.4
 	github.com/go-redis/redis/v8 v8.11.3
-	github.com/kaellybot/kaelly-amqp v0.0.2-beta14
+	github.com/kaellybot/kaelly-amqp v0.0.3-beta1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.14.0
 	gorm.io/driver/mysql v1.5.1
@@ -49,7 +49,7 @@ require (
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.30.0
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

@@ -3,14 +3,15 @@ package constants
 import "github.com/rs/zerolog"
 
 const (
-	LogFileName      = "fileName"
-	LogCorrelationID = "correlationID"
 	LogAnkamaID      = "ankamaID"
+	LogCorrelationID = "correlationID"
+	LogDate          = "date"
+	LogEntityCount   = "entityCount"
+	LogFileName      = "fileName"
+	LogItemType      = "itemType"
+	LogKey           = "key"
 	LogQueryID       = "queryID"
 	LogQueryType     = "queryType"
-	LogItemType      = "itemType"
-	LogEntityCount   = "entityCount"
-	LogKey           = "key"
 
 	LogLevelFallback = zerolog.InfoLevel
 )

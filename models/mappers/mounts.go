@@ -13,10 +13,6 @@ func MapMount(item *dodugo.Mount) *amqp.EncyclopediaItemAnswer {
 	return &amqp.EncyclopediaItemAnswer{
 		Type:  amqp.ItemType_MOUNT,
 		Mount: &amqp.EncyclopediaItemAnswer_Mount{},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }

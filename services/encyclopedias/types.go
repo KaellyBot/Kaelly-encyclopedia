@@ -20,8 +20,8 @@ var (
 	errBadRequestMessage = errors.New("message request could not be satisfied")
 )
 
-type getItemListFunc func(ctx context.Context, query, correlationID,
-	lg string) (*amqp.EncyclopediaItemListAnswer, error)
+type getListFunc func(ctx context.Context, query, correlationID,
+	lg string) (*amqp.EncyclopediaListAnswer, error)
 type getItemByIDFunc func(ctx context.Context, ID int32, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error)
 type getItemByQueryFunc func(ctx context.Context, query, correlationID,
@@ -40,9 +40,9 @@ type Service interface {
 }
 
 type Impl struct {
-	sourceService     sources.Service
-	equipmentService  equipments.Service
-	broker            amqp.MessageBroker
-	getItemByFuncs    map[amqp.ItemType]getItemFuncs
-	getItemListByFunc map[amqp.EncyclopediaItemListRequest_Type]getItemListFunc
+	sourceService    sources.Service
+	equipmentService equipments.Service
+	broker           amqp.MessageBroker
+	getItemByFuncs   map[amqp.ItemType]getItemFuncs
+	getListByFunc    map[amqp.EncyclopediaListRequest_Type]getListFunc
 }

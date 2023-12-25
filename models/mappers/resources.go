@@ -13,10 +13,6 @@ func MapResource(item *dodugo.Resource, ingredientItems map[int32]*constants.Ing
 	return &amqp.EncyclopediaItemAnswer{
 		Type:     amqp.ItemType_RESOURCE,
 		Resource: &amqp.EncyclopediaItemAnswer_Resource{},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }

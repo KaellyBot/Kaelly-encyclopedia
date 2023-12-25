@@ -9,17 +9,17 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 )
 
-func MapItemList(dodugoItems []dodugo.ItemsListEntryTyped) *amqp.EncyclopediaItemListAnswer {
-	items := make([]*amqp.EncyclopediaItemListAnswer_Item, 0)
+func MapItemList(dodugoItems []dodugo.ItemsListEntryTyped) *amqp.EncyclopediaListAnswer {
+	items := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, item := range dodugoItems {
-		items = append(items, &amqp.EncyclopediaItemListAnswer_Item{
+		items = append(items, &amqp.EncyclopediaListAnswer_Item{
 			Id:   fmt.Sprintf("%v", item.AnkamaId),
 			Name: *item.Name,
 		})
 	}
 
-	return &amqp.EncyclopediaItemListAnswer{
+	return &amqp.EncyclopediaListAnswer{
 		Items: items,
 	}
 }
@@ -31,11 +31,7 @@ func MapQuestItem(item *dodugo.Resource, ingredientItems map[int32]*constants.In
 	return &amqp.EncyclopediaItemAnswer{
 		Type:      amqp.ItemType_QUEST_ITEM,
 		QuestItem: &amqp.EncyclopediaItemAnswer_QuestItem{},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }
 

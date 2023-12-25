@@ -13,9 +13,10 @@ import (
 type objectType string
 
 const (
-	almanax objectType = "almanax"
-	item    objectType = "items"
-	set     objectType = "sets"
+	almanax       objectType = "almanax"
+	almanaxEffect objectType = "almanaxEffect"
+	item          objectType = "items"
+	set           objectType = "sets"
 )
 
 var (
@@ -33,6 +34,7 @@ type Service interface {
 	SearchQuestItems(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchResources(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchSets(ctx context.Context, query, lg string) ([]dodugo.SetListEntry, error)
+	SearchAlmanaxEffects(ctx context.Context, query, lg string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error)
 
 	GetConsumableByID(ctx context.Context, consumableID int32, lg string) (*dodugo.Resource, error)
 	GetCosmeticByID(ctx context.Context, cosmeticID int32, lg string) (*dodugo.Cosmetic, error)
@@ -49,6 +51,8 @@ type Service interface {
 	GetQuestItemByQuery(ctx context.Context, query, lg string) (*dodugo.Resource, error)
 	GetResourceByQuery(ctx context.Context, query, lg string) (*dodugo.Resource, error)
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)
+
+	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.AlmanaxEntry, error)
 }
 
 type Impl struct {

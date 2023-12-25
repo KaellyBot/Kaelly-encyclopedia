@@ -13,10 +13,6 @@ func MapCosmetic(item *dodugo.Cosmetic, ingredientItems map[int32]*constants.Ing
 	return &amqp.EncyclopediaItemAnswer{
 		Type:     amqp.ItemType_COSMETIC,
 		Cosmetic: &amqp.EncyclopediaItemAnswer_Cosmetic{},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }

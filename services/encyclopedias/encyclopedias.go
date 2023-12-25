@@ -17,9 +17,10 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 		equipmentService: equipmentService,
 		broker:           broker,
 	}
-	service.getItemListByFunc = map[amqp.EncyclopediaItemListRequest_Type]getItemListFunc{
-		amqp.EncyclopediaItemListRequest_ANY: service.getItemList,
-		amqp.EncyclopediaItemListRequest_SET: service.getSetList,
+	service.getListByFunc = map[amqp.EncyclopediaListRequest_Type]getListFunc{
+		amqp.EncyclopediaListRequest_ITEM:           service.getItemList,
+		amqp.EncyclopediaListRequest_SET:            service.getSetList,
+		amqp.EncyclopediaListRequest_ALMANAX_EFFECT: service.getAlmanaxEffectList,
 	}
 
 	service.getItemByFuncs = map[amqp.ItemType]getItemFuncs{
@@ -28,8 +29,8 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 			GetItemByQuery: service.getItemByQuery,
 		},
 		amqp.ItemType_CONSUMABLE: {
-			GetItemByID:    service.getConsumableByID,
-			GetItemByQuery: service.getConsumableByQuery,
+			GetItemByID:       service.getConsumableByID,
+			GetItemByQuery:    service.getConsumableByQuery,
 			GetIngredientByID: service.getConsumableIngredientByID,
 		},
 		amqp.ItemType_COSMETIC: {
@@ -82,8 +83,12 @@ func (service *Impl) consume(ctx context.Context,
 	switch message.Type {
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST:
 		service.almanaxRequest(ctx, message, correlationID)
-	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_LIST_REQUEST:
-		service.itemListRequest(ctx, message, correlationID)
+	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST:
+		service.almanaxResourceRequest(ctx, message, correlationID)
+	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST:
+		service.almanaxEffectRequest(ctx, message, correlationID)
+	case amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST:
+		service.listRequest(ctx, message, correlationID)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST:
 		service.itemRequest(ctx, message, correlationID)
 	default:

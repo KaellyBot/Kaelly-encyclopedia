@@ -79,10 +79,6 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Effects:     effects,
 			Recipe:      recipe,
 		},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }

@@ -13,10 +13,6 @@ func MapConsumable(item *dodugo.Resource, ingredientItems map[int32]*constants.I
 	return &amqp.EncyclopediaItemAnswer{
 		Type:       amqp.ItemType_CONSUMABLE,
 		Consumable: &amqp.EncyclopediaItemAnswer_Consumable{},
-		Source: &amqp.Source{
-			Name: constants.GetEncyclopediasSource().Name,
-			Icon: constants.GetEncyclopediasSource().Icon,
-			Url:  constants.GetEncyclopediasSource().URL,
-		},
+		Source: constants.GetDofusDudeSource(),
 	}
 }
