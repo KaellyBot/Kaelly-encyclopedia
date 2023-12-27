@@ -35,7 +35,7 @@ func (service *Impl) SearchAnyItems(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.AllItemsAPI.
 			GetItemsAllSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -57,7 +57,7 @@ func (service *Impl) SearchConsumables(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.ConsumablesAPI.
 			GetItemsConsumablesSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -100,7 +100,7 @@ func (service *Impl) GetConsumableByID(ctx context.Context, itemID int32, langua
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.ConsumablesAPI.
 			GetItemsConsumablesSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -122,7 +122,7 @@ func (service *Impl) SearchCosmetics(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
 			GetCosmeticsSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -165,7 +165,7 @@ func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int32, language
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
 			GetCosmeticsSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -187,7 +187,7 @@ func (service *Impl) SearchEquipments(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.EquipmentAPI.
 			GetItemsEquipmentSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -230,7 +230,7 @@ func (service *Impl) GetEquipmentByID(ctx context.Context, itemID int32, languag
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.EquipmentAPI.
 			GetItemsEquipmentSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -252,7 +252,7 @@ func (service *Impl) SearchMounts(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.MountsAPI.
 			GetMountsSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -295,7 +295,7 @@ func (service *Impl) GetMountByID(ctx context.Context, itemID int32, language st
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.MountsAPI.
 			GetMountsSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -317,7 +317,7 @@ func (service *Impl) SearchQuestItems(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.QuestItemsAPI.
 			GetItemsQuestSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -360,7 +360,7 @@ func (service *Impl) GetQuestItemByID(ctx context.Context, itemID int32, languag
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.QuestItemsAPI.
 			GetItemQuestSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -382,7 +382,7 @@ func (service *Impl) SearchResources(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.ResourcesAPI.
 			GetItemsResourceSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -425,7 +425,7 @@ func (service *Impl) GetResourceByID(ctx context.Context, itemID int32, language
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.ResourcesAPI.
 			GetItemsResourcesSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -447,7 +447,7 @@ func (service *Impl) SearchSets(ctx context.Context, query,
 		resp, r, err := service.dofusDudeClient.SetsAPI.
 			GetSetsSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -490,7 +490,7 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int32, language strin
 	if !service.getElementFromCache(ctx, key, &dodugoSet) {
 		resp, r, err := service.dofusDudeClient.SetsAPI.
 			GetSetsSingle(ctx, language, setID, constants.DofusDudeGame).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -513,7 +513,7 @@ func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,
 			GetMetaAlmanaxBonuses(ctx, language).
 			// TODO a query is needed /Query(query).Limit(constants.DofusDudeLimit).
 			Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -535,7 +535,7 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
 			GetAlmanaxDate(ctx, language, dodugoAlmanaxDate).Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()
@@ -547,6 +547,34 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 		log.Warn().
 			Str(constants.LogDate, dodugoAlmanaxDate).
 			Msgf("DofusDude API returns 404 NOT_FOUND for specific date, continuing with nil almanax...")
+	}
+
+	return dodugoAlmanax, nil
+}
+
+func (service *Impl) GetAlmanaxByEffect(ctx context.Context, effect, language string,
+) (*dodugo.AlmanaxEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoAlmanax *dodugo.AlmanaxEntry
+	var dodugoAlmanaxOccurrences []dodugo.AlmanaxEntry
+	key := buildKey(almanax, effect, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoAlmanaxOccurrences) {
+		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
+			GetAlmanaxRange(ctx, language).
+			FilterBonusType(effect).
+			RangeSize(constants.DofusDudeAlmanaxSizeLimit).
+			Execute()
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+	}
+
+	if len(dodugoAlmanaxOccurrences) > 0 {
+		dodugoAlmanax = &dodugoAlmanaxOccurrences[0]
 	}
 
 	return dodugoAlmanax, nil
@@ -565,7 +593,7 @@ func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, 
 			GetAlmanaxRange(ctx, language).
 			RangeSize(daysDuration).
 			Execute()
-		if err != nil && r.StatusCode != http.StatusNotFound {
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
 		defer r.Body.Close()

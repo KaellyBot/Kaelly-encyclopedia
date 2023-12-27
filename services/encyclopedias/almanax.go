@@ -6,6 +6,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
@@ -34,6 +35,7 @@ func (service *Impl) almanaxRequest(ctx context.Context, message *amqp.RabbitMQM
 
 func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
 	request := message.EncyclopediaAlmanaxEffectRequest
+	lg := mappers.MapLanguage(message.Language)
 	if !isValidAlmanaxEffectRequest(request) {
 		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
 		return
@@ -42,9 +44,38 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get almanax effect encyclopedia request received")
 
-	// TODO
+	values, err := service.sourceService.SearchAlmanaxEffects(ctx, request.Query, lg)
+	if err != nil {
+		log.Error().Str(constants.LogCorrelationID, correlationID).
+			Err(err).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while handling encyclopedia almanax effect and searching for almanax effect list, returning failed request")
+		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
+		return
+	}
 
-	service.publishAlmanaxEffectAnswerSuccess(correlationID, nil, message.Language)
+	if len(values) == 0 {
+		log.Error().Str(constants.LogCorrelationID, correlationID).
+			Err(sources.ErrNotFound).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while handling encyclopedia almanax effect and searching for almanax effect list, returning failed request")
+		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
+		return
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	effect := values[0]
+	almanax, err := service.sourceService.GetAlmanaxByEffect(ctx, *effect.Id, lg)
+	if err != nil {
+		log.Error().Str(constants.LogCorrelationID, correlationID).
+			Err(err).
+			Str(constants.LogQueryID, request.Query).
+			Msgf("Error while handling encyclopedia almanax effect, returning failed request")
+		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
+		return
+	}
+
+	service.publishAlmanaxEffectAnswerSuccess(correlationID, mappers.MapAlmanax(almanax), message.Language)
 }
 
 func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {

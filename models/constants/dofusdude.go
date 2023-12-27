@@ -6,6 +6,7 @@ const (
 	DofusDudeGame              = "dofus2"
 	DofusDudeDefaultLanguage   = "en"
 	DofusDudeAlmanaxDateFormat = "2006-01-02"
+	DofusDudeAlmanaxSizeLimit  = 35
 	DofusDudeLimit             = 25
 )
 
