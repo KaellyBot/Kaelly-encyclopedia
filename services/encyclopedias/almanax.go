@@ -49,6 +49,7 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 
 func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
 	request := message.EncyclopediaAlmanaxResourceRequest
+	lg := mappers.MapLanguage(message.Language)
 	if !isValidAlmanaxResourceRequest(request) {
 		service.publishAlmanaxResourceAnswerFailed(correlationID, message.Language)
 		return
@@ -57,9 +58,17 @@ func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.R
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get almanax resources encyclopedia request received")
 
-	// TODO
+	almanax, err := service.sourceService.GetAlmanaxByRange(ctx, request.Duration, lg)
+	if err != nil {
+		log.Error().Str(constants.LogCorrelationID, correlationID).
+			Int32(constants.LogDuration, request.Duration).
+			Msgf("Error while handling encyclopedia almanax resources, returning failed request")
+		service.publishAlmanaxResourceAnswerFailed(correlationID, message.Language)
+		return
+	}
 
-	service.publishAlmanaxResourceAnswerFailed(correlationID, message.Language)
+	answer := mappers.MapAlmanaxResource(almanax, request.Duration)
+	service.publishAlmanaxResourceAnswerSuccess(correlationID, answer, message.Language)
 }
 
 func isValidAlmanaxRequest(request *amqp.EncyclopediaAlmanaxRequest) bool {
@@ -141,6 +150,23 @@ func (service *Impl) publishAlmanaxResourceAnswerFailed(correlationID string, la
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_ANSWER,
 		Status:   amqp.RabbitMQMessage_FAILED,
 		Language: language,
+	}
+
+	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
+	if err != nil {
+		log.Error().Err(err).Str(constants.LogCorrelationID, correlationID).
+			Msgf("Cannot publish via broker, request ignored")
+	}
+}
+
+func (service *Impl) publishAlmanaxResourceAnswerSuccess(correlationID string,
+	almanax *amqp.EncyclopediaAlmanaxResourceAnswer, language amqp.Language) {
+
+	message := amqp.RabbitMQMessage{
+		Type:                              amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_ANSWER,
+		Status:                            amqp.RabbitMQMessage_SUCCESS,
+		Language:                          language,
+		EncyclopediaAlmanaxResourceAnswer: almanax,
 	}
 
 	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)

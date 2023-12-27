@@ -6,6 +6,7 @@ const (
 	LogAnkamaID      = "ankamaID"
 	LogCorrelationID = "correlationID"
 	LogDate          = "date"
+	LogDuration      = "duration"
 	LogEntityCount   = "entityCount"
 	LogFileName      = "fileName"
 	LogItemType      = "itemType"

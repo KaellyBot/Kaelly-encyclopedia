@@ -59,3 +59,30 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 		Items: effects,
 	}
 }
+
+func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32) *amqp.EncyclopediaAlmanaxResourceAnswer {
+	resources := make(map[string]int32, 0)
+	for _, almanax := range dodugoAlmanax {
+		itemName := *almanax.Tribute.GetItem().Name
+		quantity, found := resources[itemName]
+		if !found {
+			quantity = 0
+		}
+
+		resources[itemName] = quantity + almanax.Tribute.GetQuantity()
+	}
+
+	tributes := make([]*amqp.EncyclopediaAlmanaxResourceAnswer_Tribute, 0)
+	for itemName, quantity := range resources {
+		tributes = append(tributes, &amqp.EncyclopediaAlmanaxResourceAnswer_Tribute{
+			ItemName: itemName,
+			Quantity: quantity,
+		})
+	}
+
+	return &amqp.EncyclopediaAlmanaxResourceAnswer{
+		Tributes: tributes,
+		Duration: dayDuration,
+		Source:   constants.GetDofusDudeSource(),
+	}
+}

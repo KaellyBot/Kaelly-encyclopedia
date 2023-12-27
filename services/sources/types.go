@@ -14,6 +14,7 @@ type objectType string
 
 const (
 	almanax       objectType = "almanax"
+	almanaxRange  objectType = "almanaxRange"
 	almanaxEffect objectType = "almanaxEffect"
 	item          objectType = "items"
 	set           objectType = "sets"
@@ -53,6 +54,7 @@ type Service interface {
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)
 
 	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.AlmanaxEntry, error)
+	GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string) ([]dodugo.AlmanaxEntry, error)
 }
 
 type Impl struct {

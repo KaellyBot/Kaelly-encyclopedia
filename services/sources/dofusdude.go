@@ -551,3 +551,27 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 
 	return dodugoAlmanax, nil
 }
+
+func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string,
+) ([]dodugo.AlmanaxEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoAlmanax []dodugo.AlmanaxEntry
+	dodugoAlmanaxDate := time.Now().Format(constants.DofusDudeAlmanaxDateFormat)
+	key := buildKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration), language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
+		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
+			GetAlmanaxRange(ctx, language).
+			RangeSize(daysDuration).
+			Execute()
+		if err != nil && r.StatusCode != http.StatusNotFound {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		dodugoAlmanax = resp
+	}
+
+	return dodugoAlmanax, nil
+}
