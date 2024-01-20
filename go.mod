@@ -5,7 +5,7 @@ go 1.20
 //replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
-	github.com/dofusdude/dodugo v0.7.2
+	github.com/dofusdude/dodugo v0.8.1
 	github.com/go-redis/cache/v8 v8.4.4
 	github.com/go-redis/redis/v8 v8.11.3
 	github.com/kaellybot/kaelly-amqp v0.0.3-beta2

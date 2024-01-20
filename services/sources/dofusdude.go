@@ -32,7 +32,7 @@ func (service *Impl) SearchAnyItems(ctx context.Context, query,
 	var items []dodugo.ItemsListEntryTyped
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
-		resp, r, err := service.dofusDudeClient.AllItemsAPI.
+		resp, r, err := service.dofusDudeClient.GameAPI.
 			GetItemsAllSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).Limit(constants.DofusDudeLimit).Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
@@ -510,8 +510,9 @@ func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,
 	key := buildListKey(almanaxEffect, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &effects) {
 		resp, r, err := service.dofusDudeClient.MetaAPI.
-			GetMetaAlmanaxBonuses(ctx, language).
-			// TODO a query is needed /Query(query).Limit(constants.DofusDudeLimit).
+			GetMetaAlmanaxBonusesSearch(ctx, language).
+			Query(query).
+			Limit(constants.DofusDudeLimit).
 			Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
