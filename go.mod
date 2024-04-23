@@ -5,10 +5,10 @@ go 1.22
 //replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
-	github.com/dofusdude/dodugo v0.8.1
+	github.com/dofusdude/dodugo v0.9.0
 	github.com/go-redis/cache/v8 v8.4.4
 	github.com/go-redis/redis/v8 v8.11.3
-	github.com/kaellybot/kaelly-amqp v0.0.3-beta5
+	github.com/kaellybot/kaelly-amqp v0.0.3-beta6
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.14.0
 	gorm.io/driver/mysql v1.5.1

@@ -38,6 +38,7 @@ func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry) *amqp.Almanax {
 			},
 			Quantity: *dodugoAlmanax.Tribute.Quantity,
 		},
+		Reward: int64(dodugoAlmanax.GetRewardKamas()),
 		Date:   timestamppb.New(date.UTC()),
 		Source: constants.GetDofusDudeSource(),
 	}
