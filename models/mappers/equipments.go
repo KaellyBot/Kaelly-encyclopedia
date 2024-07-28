@@ -43,7 +43,7 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 					Msgf("Cannot build entire recipe (missing ingredient), continuing with degraded mode")
 				ingredient = &constants.Ingredient{
 					Name: formattedItemIDString,
-					Type: amqp.ItemType_ANY_ITEM,
+					Type: amqp.IngredientType_ANY_INGREDIENT,
 				}
 			}
 

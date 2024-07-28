@@ -49,12 +49,12 @@ func (service *Impl) listRequest(ctx context.Context,
 
 func (service *Impl) getItemList(ctx context.Context, query, _,
 	lg string) (*amqp.EncyclopediaListAnswer, error) {
-	dodugoItems, err := service.sourceService.SearchAnyItems(ctx, query, lg)
+	dodugoItems, err := service.sourceService.SearchEquipments(ctx, query, lg)
 	if err != nil {
 		return nil, err
 	}
 
-	return mappers.MapItemList(dodugoItems), nil
+	return mappers.MapEquipmentList(dodugoItems), nil
 }
 
 func (service *Impl) getSetList(ctx context.Context, query, _,

@@ -30,9 +30,8 @@ type getIngredientByIDFunc func(ctx context.Context, ID int32, correlationID,
 	lg string) (*constants.Ingredient, error)
 
 type getItemFuncs struct {
-	GetItemByID       getItemByIDFunc
-	GetItemByQuery    getItemByQueryFunc
-	GetIngredientByID getIngredientByIDFunc
+	GetItemByID    getItemByIDFunc
+	GetItemByQuery getItemByQueryFunc
 }
 
 type Service interface {
@@ -40,9 +39,10 @@ type Service interface {
 }
 
 type Impl struct {
-	sourceService    sources.Service
-	equipmentService equipments.Service
-	broker           amqp.MessageBroker
-	getItemByFuncs   map[amqp.ItemType]getItemFuncs
-	getListByFunc    map[amqp.EncyclopediaListRequest_Type]getListFunc
+	sourceService        sources.Service
+	equipmentService     equipments.Service
+	broker               amqp.MessageBroker
+	getListByFunc        map[amqp.EncyclopediaListRequest_Type]getListFunc
+	getItemByFuncs       map[amqp.ItemType]getItemFuncs
+	getIngredientByFuncs map[amqp.IngredientType]getIngredientByIDFunc
 }

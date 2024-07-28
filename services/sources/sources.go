@@ -18,13 +18,14 @@ func New(storeService stores.Service) (*Impl, error) {
 		storeService:    storeService,
 		httpTimeout:     viper.GetDuration(constants.DofusDudeTimeout),
 		itemTypes: map[string]amqp.ItemType{
-			"consumables": amqp.ItemType_CONSUMABLE,
-			"cosmetics":   amqp.ItemType_COSMETIC,
-			"equipment":   amqp.ItemType_EQUIPMENT,
-			"mounts":      amqp.ItemType_MOUNT,
-			"quest":       amqp.ItemType_QUEST_ITEM,
-			"resources":   amqp.ItemType_RESOURCE,
-			"sets":        amqp.ItemType_SET,
+			"equipment": amqp.ItemType_EQUIPMENT,
+			"sets":      amqp.ItemType_SET,
+		},
+		ingredientTypes: map[string]amqp.IngredientType{
+			"consumables": amqp.IngredientType_CONSUMABLE,
+			"equipment":   amqp.IngredientType_EQUIPMENT_INGREDIENT,
+			"quest":       amqp.IngredientType_QUEST_ITEM,
+			"resources":   amqp.IngredientType_RESOURCE,
 		},
 	}, nil
 }
