@@ -8,7 +8,7 @@ require (
 	github.com/dofusdude/dodugo v0.9.0
 	github.com/go-redis/cache/v8 v8.4.4
 	github.com/go-redis/redis/v8 v8.11.3
-	github.com/kaellybot/kaelly-amqp v0.0.4-beta3
+	github.com/kaellybot/kaelly-amqp v0.0.5-beta1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/viper v1.14.0
 	gorm.io/driver/mysql v1.5.1
