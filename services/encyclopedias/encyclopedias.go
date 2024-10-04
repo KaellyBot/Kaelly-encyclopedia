@@ -18,6 +18,7 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 		broker:           broker,
 	}
 	service.getListByFunc = map[amqp.EncyclopediaListRequest_Type]getListFunc{
+		amqp.EncyclopediaListRequest_UNKNOWN:        nil,
 		amqp.EncyclopediaListRequest_ITEM:           service.getItemList,
 		amqp.EncyclopediaListRequest_SET:            service.getSetList,
 		amqp.EncyclopediaListRequest_ALMANAX_EFFECT: service.getAlmanaxEffectList,
@@ -39,6 +40,7 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 	}
 
 	service.getIngredientByFuncs = map[amqp.IngredientType]getIngredientByIDFunc{
+		amqp.IngredientType_ANY_INGREDIENT:       nil,
 		amqp.IngredientType_CONSUMABLE:           service.getConsumableIngredientByID,
 		amqp.IngredientType_EQUIPMENT_INGREDIENT: service.getEquipmentIngredientByID,
 		amqp.IngredientType_QUEST_ITEM:           service.getQuestItemIngredientByID,

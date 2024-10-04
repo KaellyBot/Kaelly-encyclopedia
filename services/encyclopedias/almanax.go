@@ -49,7 +49,8 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 		log.Error().Str(constants.LogCorrelationID, correlationID).
 			Err(err).
 			Str(constants.LogQueryID, request.Query).
-			Msgf("Error while handling encyclopedia almanax effect and searching for almanax effect list, returning failed request")
+			Msgf("Error while handling encyclopedia almanax effect" +
+				" and searching for almanax effect list, returning failed request")
 		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
 		return
 	}
@@ -58,7 +59,8 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 		log.Error().Str(constants.LogCorrelationID, correlationID).
 			Err(sources.ErrNotFound).
 			Str(constants.LogQueryID, request.Query).
-			Msgf("Error while handling encyclopedia almanax effect and searching for almanax effect list, returning failed request")
+			Msgf("Error while handling encyclopedia almanax effect" +
+				" and searching for almanax effect list, returning failed request")
 		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
 		return
 	}
@@ -159,7 +161,8 @@ func (service *Impl) publishAlmanaxEffectAnswerFailed(correlationID string, lang
 	}
 }
 
-func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID string, almanax *amqp.Almanax, language amqp.Language) {
+func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID string, almanax *amqp.Almanax,
+	language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_ANSWER,
 		Status:   amqp.RabbitMQMessage_SUCCESS,
@@ -192,7 +195,6 @@ func (service *Impl) publishAlmanaxResourceAnswerFailed(correlationID string, la
 
 func (service *Impl) publishAlmanaxResourceAnswerSuccess(correlationID string,
 	almanax *amqp.EncyclopediaAlmanaxResourceAnswer, language amqp.Language) {
-
 	message := amqp.RabbitMQMessage{
 		Type:                              amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_ANSWER,
 		Status:                            amqp.RabbitMQMessage_SUCCESS,

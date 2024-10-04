@@ -67,14 +67,13 @@ func (service *Impl) itemRequest(ctx context.Context,
 	service.publishItemAnswerSuccess(reply, correlationID, message.Language)
 }
 
-func (service *Impl) getItemByID(ctx context.Context, id int32, correlationID,
-	lg string) (*amqp.EncyclopediaItemAnswer, error) {
+func (service *Impl) getItemByID(_ context.Context, _ int32, _,
+	_ string) (*amqp.EncyclopediaItemAnswer, error) {
 	return nil, errBadRequestMessage
 }
 
 func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
-
 	values, err := service.sourceService.SearchAnyItems(ctx, query, lg)
 	if err != nil {
 		return nil, err

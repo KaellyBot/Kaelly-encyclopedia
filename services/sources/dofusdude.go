@@ -338,7 +338,8 @@ func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, 
 
 	var dodugoAlmanax []dodugo.AlmanaxEntry
 	dodugoAlmanaxDate := time.Now().Format(constants.DofusDudeAlmanaxDateFormat)
-	key := buildKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration), language, constants.GetEncyclopediasSource().Name)
+	key := buildKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration),
+		language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
 			GetAlmanaxRange(ctx, language).

@@ -33,10 +33,10 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
 	return mappers.MapSet(set, items, service.equipmentService), nil
 }
 
-func (service *Impl) getSetEquipments(ctx context.Context, equipmentIds []int32, correlationID,
+func (service *Impl) getSetEquipments(ctx context.Context, equipmentIDs []int32, correlationID,
 	lg string) map[int32]*dodugo.Weapon {
 	items := make(map[int32]*dodugo.Weapon)
-	for _, itemID := range equipmentIds {
+	for _, itemID := range equipmentIDs {
 		item, errItem := service.sourceService.GetEquipmentByID(ctx, itemID, lg)
 		if errItem != nil {
 			log.Error().Err(errItem).

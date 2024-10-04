@@ -46,7 +46,7 @@ func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.Recipe
 	return resp, nil
 }
 
-func (service *Impl) getConsumableIngredientByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getConsumableIngredientByID(ctx context.Context, id int32, _,
 	lg string) (*constants.Ingredient, error) {
 	consumable, err := service.sourceService.GetConsumableByID(ctx, id, lg)
 	if err != nil {
@@ -60,7 +60,7 @@ func (service *Impl) getConsumableIngredientByID(ctx context.Context, id int32, 
 	}, nil
 }
 
-func (service *Impl) getEquipmentIngredientByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getEquipmentIngredientByID(ctx context.Context, id int32, _,
 	lg string) (*constants.Ingredient, error) {
 	equipment, err := service.sourceService.GetEquipmentByID(ctx, id, lg)
 	if err != nil {
@@ -74,7 +74,7 @@ func (service *Impl) getEquipmentIngredientByID(ctx context.Context, id int32, c
 	}, nil
 }
 
-func (service *Impl) getQuestItemIngredientByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getQuestItemIngredientByID(ctx context.Context, id int32, _,
 	lg string) (*constants.Ingredient, error) {
 	consumable, err := service.sourceService.GetQuestItemByID(ctx, id, lg)
 	if err != nil {
@@ -88,7 +88,7 @@ func (service *Impl) getQuestItemIngredientByID(ctx context.Context, id int32, c
 	}, nil
 }
 
-func (service *Impl) getResourceIngredientByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getResourceIngredientByID(ctx context.Context, id int32, _,
 	lg string) (*constants.Ingredient, error) {
 	resource, err := service.sourceService.GetResourceByID(ctx, id, lg)
 	if err != nil {

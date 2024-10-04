@@ -46,7 +46,6 @@ func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry) *amqp.Almanax {
 
 func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200ResponseInner,
 ) *amqp.EncyclopediaListAnswer {
-
 	effects := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, effect := range dodugoAlmanaxEffects {
@@ -61,7 +60,8 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 	}
 }
 
-func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32) *amqp.EncyclopediaAlmanaxResourceAnswer {
+func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
+) *amqp.EncyclopediaAlmanaxResourceAnswer {
 	resources := make(map[string]int32, 0)
 	for _, almanax := range dodugoAlmanax {
 		itemName := *almanax.Tribute.GetItem().Name
