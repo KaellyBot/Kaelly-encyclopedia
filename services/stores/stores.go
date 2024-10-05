@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/go-redis/cache/v8"
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/cache/v9"
+	"github.com/redis/go-redis/v9"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/spf13/viper"
 )
