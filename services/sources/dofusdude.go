@@ -44,9 +44,12 @@ func (service *Impl) SearchAnyItems(ctx context.Context, query,
 	var items []dodugo.ItemsListEntryTyped
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
-		resp, r, err := service.dofusDudeClient.GameAPI.
+		resp, r, err := service.dofusDudeClient.
+			GameAPI.
 			GetItemsAllSearch(ctx, language, constants.DofusDudeGame).
-			Query(query).Limit(constants.DofusDudeLimit).Execute()
+			Query(query).
+			FilterTypeEnum(constants.GetSupportedTypeEnums()).
+			Limit(constants.DofusDudeLimit).Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}
@@ -175,6 +178,71 @@ func (service *Impl) GetResourceByID(ctx context.Context, itemID int32, language
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.ResourcesAPI.
 			GetItemsResourcesSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		dodugoItem = resp
+	}
+
+	return dodugoItem, nil
+}
+
+func (service *Impl) SearchMounts(ctx context.Context, query,
+	language string) ([]dodugo.MountListEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var items []dodugo.MountListEntry
+	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &items) {
+		resp, r, err := service.dofusDudeClient.MountsAPI.
+			GetMountsSearch(ctx, language, constants.DofusDudeGame).
+			Query(query).Limit(constants.DofusDudeLimit).Execute()
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		items = resp
+	}
+
+	return items, nil
+}
+
+func (service *Impl) GetMountByQuery(ctx context.Context, query, language string,
+) (*dodugo.Mount, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	values, err := service.SearchMounts(ctx, query, language)
+	if err != nil {
+		return nil, err
+	}
+	if len(values) == 0 {
+		return nil, ErrNotFound
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	resp, err := service.GetMountByID(ctx, values[0].GetAnkamaId(), language)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (service *Impl) GetMountByID(ctx context.Context, itemID int32, language string,
+) (*dodugo.Mount, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoItem *dodugo.Mount
+	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoItem) {
+		resp, r, err := service.dofusDudeClient.MountsAPI.
+			GetMountsSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
 		}

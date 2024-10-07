@@ -11,8 +11,6 @@ import (
 
 func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
-	// TODO the rest
-
 	var set *amqp.EncyclopediaItemAnswer_Equipment_Set
 	if item.HasParentSet() {
 		parentSet := item.GetParentSet()

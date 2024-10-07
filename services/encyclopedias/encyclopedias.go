@@ -33,6 +33,10 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 			GetItemByID:    service.getEquipmentByID,
 			GetItemByQuery: service.getEquipmentByQuery,
 		},
+		amqp.ItemType_MOUNT_TYPE: {
+			GetItemByID:    service.getMountByID,
+			GetItemByQuery: service.getMountByQuery,
+		},
 		amqp.ItemType_SET: {
 			GetItemByID:    service.getSetByID,
 			GetItemByQuery: service.getSetByQuery,

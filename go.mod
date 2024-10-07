@@ -5,9 +5,9 @@ go 1.22
 //replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
-	github.com/dofusdude/dodugo v0.9.0
+	github.com/dofusdude/dodugo v0.9.1
 	github.com/go-redis/cache/v9 v9.0.0
-	github.com/kaellybot/kaelly-amqp v0.0.5-beta2
+	github.com/kaellybot/kaelly-amqp v0.0.5-beta3
 	github.com/prometheus/client_golang v1.20.4
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/rs/zerolog v1.33.0
@@ -55,5 +55,6 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

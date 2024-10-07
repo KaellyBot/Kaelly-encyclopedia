@@ -10,6 +10,35 @@ const (
 	DofusDudeLimit             = 25
 )
 
+func GetSupportedTypeEnums() []string {
+	return []string{
+		"shield",
+		"hat",
+		"cloak",
+		"amulet",
+		"ring",
+		"belt",
+		"boots",
+		"axe",
+		"bow",
+		"dagger",
+		"hammer",
+		"lance",
+		"pickaxe",
+		"scythe",
+		"shovel",
+		"staff",
+		"sword",
+		"wand",
+		"dofus",
+		"prysmaradite",
+		"trophy",
+		"pet",
+		"petsmount",
+		"mount",
+	}
+}
+
 func GetLanguages() map[amqp.Language]string {
 	return map[amqp.Language]string{
 		amqp.Language_ANY: DofusDudeDefaultLanguage,
