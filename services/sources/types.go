@@ -28,7 +28,7 @@ type Service interface {
 	GetItemType(itemType string) amqp.ItemType
 	GetIngredientType(ingredientType string) amqp.IngredientType
 
-	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.ItemsListEntryTyped, error)
+	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.GetGameSearch200ResponseInner, error)
 	SearchEquipments(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchMounts(ctx context.Context, query, lg string) ([]dodugo.MountListEntry, error)
 	SearchSets(ctx context.Context, query, lg string) ([]dodugo.SetListEntry, error)

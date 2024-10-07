@@ -85,7 +85,7 @@ func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 
 	// We trust the omnisearch by taking the first one in the list
 	item := values[0]
-	itemType := service.sourceService.GetItemType(item.GetItemSubtype())
+	itemType := service.sourceService.GetItemType(item.GetType())
 	funcs, found := service.getItemByFuncs[itemType]
 	if !found {
 		return nil, sources.ErrNotFound

@@ -37,16 +37,16 @@ func (service *Impl) GetIngredientType(itemType string) amqp.IngredientType {
 }
 
 func (service *Impl) SearchAnyItems(ctx context.Context, query,
-	language string) ([]dodugo.ItemsListEntryTyped, error) {
+	language string) ([]dodugo.GetGameSearch200ResponseInner, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var items []dodugo.ItemsListEntryTyped
+	var items []dodugo.GetGameSearch200ResponseInner
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
 		resp, r, err := service.dofusDudeClient.
 			GameAPI.
-			GetItemsAllSearch(ctx, language, constants.DofusDudeGame).
+			GetGameSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).
 			FilterTypeEnum(constants.GetSupportedTypeEnums()).
 			Limit(constants.DofusDudeLimit).Execute()

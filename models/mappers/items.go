@@ -8,7 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 )
 
-func MapItemList(dodugoItems []dodugo.ItemsListEntryTyped) *amqp.EncyclopediaListAnswer {
+func MapItemList(dodugoItems []dodugo.GetGameSearch200ResponseInner) *amqp.EncyclopediaListAnswer {
 	items := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, item := range dodugoItems {
