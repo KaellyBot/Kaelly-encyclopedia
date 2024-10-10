@@ -24,6 +24,8 @@ var (
 	ErrNotFound = errors.New("cannot find the desired resource")
 )
 
+type GameEventHandler func()
+
 type Service interface {
 	GetItemType(itemType string) amqp.ItemType
 	GetIngredientType(ingredientType string) amqp.IngredientType
@@ -48,9 +50,12 @@ type Service interface {
 	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.AlmanaxEntry, error)
 	GetAlmanaxByEffect(ctx context.Context, effect, language string) (*dodugo.AlmanaxEntry, error)
 	GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string) ([]dodugo.AlmanaxEntry, error)
+
+	ListenGameEvent(handler GameEventHandler)
 }
 
 type Impl struct {
+	eventHandlers   []GameEventHandler
 	dofusDudeClient *dodugo.APIClient
 	storeService    stores.Service
 	httpTimeout     time.Duration

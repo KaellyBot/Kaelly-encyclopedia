@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-redis/cache/v9"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 )
@@ -40,6 +41,10 @@ func buildListKey(objType objectType, query, language, source string) string {
 	return fmt.Sprintf("%v/%v?query=%v&lg=%v", source, objType, query, language)
 }
 
-func buildKey(objType objectType, query, language, source string) string {
+func buildItemKey(objType objectType, query, language, source string) string {
 	return fmt.Sprintf("%v/%v/%v?lg=%v", source, objType, query, language)
+}
+
+func buildGameKey(source string, game amqp.Game) string {
+	return fmt.Sprintf("game/%v?source=%v", game, source)
 }

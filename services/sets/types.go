@@ -3,6 +3,7 @@ package sets
 import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
 type Service interface {
@@ -10,6 +11,7 @@ type Service interface {
 }
 
 type Impl struct {
-	sets       map[int32]entities.Set
-	repository repository.Repository
+	sets          map[int32]entities.Set
+	sourceService sources.Service
+	repository    repository.Repository
 }

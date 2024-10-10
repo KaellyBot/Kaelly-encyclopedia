@@ -1,19 +1,19 @@
 package sets
 
 import (
-	"github.com/go-co-op/gocron/v2"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
-func New(scheduler gocron.Scheduler,
-	repository repository.Repository) (*Impl, error) {
+func New(repository repository.Repository,
+	sourceService sources.Service) (*Impl, error) {
 	service := Impl{
-		sets:       make(map[int32]entities.Set),
-		repository: repository,
+		sourceService: sourceService,
+		sets:          make(map[int32]entities.Set),
+		repository:    repository,
 	}
 
 	errDB := service.loadSetFromDB()
@@ -21,15 +21,7 @@ func New(scheduler gocron.Scheduler,
 		return nil, errDB
 	}
 
-	_, errJob := scheduler.NewJob(
-		gocron.CronJob(viper.GetString(constants.UpdateSetCronTab), true),
-		gocron.NewTask(func() { service.updateSets() }),
-		gocron.WithName("Set icons build"),
-	)
-	if errJob != nil {
-		return nil, errJob
-	}
-
+	service.sourceService.ListenGameEvent(service.buildMissingSets)
 	return &service, nil
 }
 
@@ -55,6 +47,6 @@ func (service *Impl) loadSetFromDB() error {
 	return nil
 }
 
-func (service *Impl) updateSets() {
-	// TODO
+func (service *Impl) buildMissingSets() {
+	// TODO sets, err := service.sourceService.GetSets()
 }

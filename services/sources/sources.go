@@ -2,18 +2,21 @@ package sources
 
 import (
 	"github.com/dofusdude/dodugo"
+	"github.com/go-co-op/gocron/v2"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/spf13/viper"
 )
 
-func New(storeService stores.Service) (*Impl, error) {
+func New(scheduler gocron.Scheduler,
+	storeService stores.Service) (*Impl, error) {
 	config := dodugo.NewConfiguration()
 	config.UserAgent = constants.UserAgent
 	apiClient := dodugo.NewAPIClient(config)
 
-	return &Impl{
+	service := Impl{
+		eventHandlers:   make([]GameEventHandler, 0),
 		dofusDudeClient: apiClient,
 		storeService:    storeService,
 		httpTimeout:     viper.GetDuration(constants.DofusDudeTimeout),
@@ -28,5 +31,16 @@ func New(storeService stores.Service) (*Impl, error) {
 			"quest":       amqp.IngredientType_QUEST_ITEM,
 			"resources":   amqp.IngredientType_RESOURCE,
 		},
-	}, nil
+	}
+
+	_, errJob := scheduler.NewJob(
+		gocron.CronJob(viper.GetString(constants.UpdateSetCronTab), true),
+		gocron.NewTask(func() { service.checkGameVersion() }),
+		gocron.WithName("Check game version"),
+	)
+	if errJob != nil {
+		return nil, errJob
+	}
+
+	return &service, nil
 }

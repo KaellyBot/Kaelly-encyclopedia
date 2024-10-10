@@ -47,12 +47,12 @@ func New() (*Impl, error) {
 		return nil, err
 	}
 
-	setService, err := sets.New(scheduler, setRepo)
+	sourceService, err := sources.New(scheduler, storeService)
 	if err != nil {
 		return nil, err
 	}
 
-	sourceService, err := sources.New(storeService)
+	setService, err := sets.New(setRepo, sourceService)
 	if err != nil {
 		return nil, err
 	}

@@ -67,7 +67,7 @@ func (service *Impl) GetConsumableByID(ctx context.Context, itemID int32, langua
 	defer cancel()
 
 	var dodugoItem *dodugo.Resource
-	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.ConsumablesAPI.
 			GetItemsConsumablesSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
@@ -132,7 +132,7 @@ func (service *Impl) GetEquipmentByID(ctx context.Context, itemID int32, languag
 	defer cancel()
 
 	var dodugoItem *dodugo.Weapon
-	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.EquipmentAPI.
 			GetItemsEquipmentSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
@@ -153,7 +153,7 @@ func (service *Impl) GetQuestItemByID(ctx context.Context, itemID int32, languag
 	defer cancel()
 
 	var dodugoItem *dodugo.Resource
-	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.QuestItemsAPI.
 			GetItemQuestSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
@@ -174,7 +174,7 @@ func (service *Impl) GetResourceByID(ctx context.Context, itemID int32, language
 	defer cancel()
 
 	var dodugoItem *dodugo.Resource
-	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.ResourcesAPI.
 			GetItemsResourcesSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
@@ -239,7 +239,7 @@ func (service *Impl) GetMountByID(ctx context.Context, itemID int32, language st
 	defer cancel()
 
 	var dodugoItem *dodugo.Mount
-	key := buildKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.MountsAPI.
 			GetMountsSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
@@ -304,7 +304,7 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int32, language strin
 	defer cancel()
 
 	var dodugoSet *dodugo.EquipmentSet
-	key := buildKey(set, fmt.Sprintf("%v", setID), language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(set, fmt.Sprintf("%v", setID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoSet) {
 		resp, r, err := service.dofusDudeClient.SetsAPI.
 			GetSetsSingle(ctx, language, setID, constants.DofusDudeGame).Execute()
@@ -350,7 +350,7 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 
 	var dodugoAlmanax *dodugo.AlmanaxEntry
 	dodugoAlmanaxDate := date.Format(constants.DofusDudeAlmanaxDateFormat)
-	key := buildKey(almanax, dodugoAlmanaxDate, language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(almanax, dodugoAlmanaxDate, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
 			GetAlmanaxDate(ctx, language, dodugoAlmanaxDate).Execute()
@@ -378,7 +378,7 @@ func (service *Impl) GetAlmanaxByEffect(ctx context.Context, effect, language st
 
 	var dodugoAlmanax *dodugo.AlmanaxEntry
 	var dodugoAlmanaxOccurrences []dodugo.AlmanaxEntry
-	key := buildKey(almanax, effect, language, constants.GetEncyclopediasSource().Name)
+	key := buildItemKey(almanax, effect, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanaxOccurrences) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
 			GetAlmanaxRange(ctx, language).
@@ -406,7 +406,7 @@ func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, 
 
 	var dodugoAlmanax []dodugo.AlmanaxEntry
 	dodugoAlmanaxDate := time.Now().Format(constants.DofusDudeAlmanaxDateFormat)
-	key := buildKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration),
+	key := buildItemKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration),
 		language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
