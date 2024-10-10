@@ -7,6 +7,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/rs/zerolog/log"
 )
 
@@ -26,7 +27,8 @@ func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaListAnswer {
 }
 
 func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
-	equipmentService equipments.Service) *amqp.EncyclopediaItemAnswer {
+	equipmentService equipments.Service, setService sets.Service,
+) *amqp.EncyclopediaItemAnswer {
 	equipments := make([]*amqp.EncyclopediaItemAnswer_Set_Equipment, 0)
 	for _, itemID := range set.GetEquipmentIds() {
 		formattedItemIDString := fmt.Sprintf("%v", itemID)
@@ -67,12 +69,19 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 		})
 	}
 
+	var icon string
+	setDB, found := setService.GetSetByDofusDude(set.GetAnkamaId())
+	if found {
+		icon = setDB.Icon
+	}
+
 	return &amqp.EncyclopediaItemAnswer{
 		Type: amqp.ItemType_SET,
 		Set: &amqp.EncyclopediaItemAnswer_Set{
 			Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
 			Name:       set.GetName(),
 			Level:      int64(set.GetHighestEquipmentLevel()),
+			Icon:       icon,
 			Equipments: equipments,
 			Bonuses:    bonuses,
 		},

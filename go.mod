@@ -6,8 +6,9 @@ go 1.22
 
 require (
 	github.com/dofusdude/dodugo v0.9.1
+	github.com/go-co-op/gocron/v2 v2.12.1
 	github.com/go-redis/cache/v9 v9.0.0
-	github.com/kaellybot/kaelly-amqp v0.0.6-beta1
+	github.com/kaellybot/kaelly-amqp v0.0.6-beta2
 	github.com/prometheus/client_golang v1.20.4
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/rs/zerolog v1.33.0
@@ -22,7 +23,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/go-co-op/gocron/v2 v2.12.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.6.0 // indirect

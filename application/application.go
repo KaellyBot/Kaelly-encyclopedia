@@ -47,7 +47,7 @@ func New() (*Impl, error) {
 		return nil, err
 	}
 
-	setService, err := sets.New(setRepo)
+	setService, err := sets.New(scheduler, setRepo)
 	if err != nil {
 		return nil, err
 	}

@@ -33,6 +33,9 @@ const (
 	// Redis cache size, following LFU rules.
 	RedisCacheSize = "REDIS_CACHE_SIZE"
 
+	// Cron tab to update set icons.
+	UpdateSetCronTab = "UPDATE_SET_CRON_TAB"
+
 	// Timeout to retrieve Dofus data. Duration type.
 	DofusDudeTimeout = "HTTP_TIMEOUT"
 
@@ -53,6 +56,7 @@ const (
 	defaultRedisAddress        = "localhost:6379"
 	defaultRedisCacheRetention = 60 * time.Minute
 	defaultRedisCacheSize      = 1000
+	defaultUpdateSetCronTab    = "0 0 0 * * *"
 	defaultDofusDudeTimeout    = 10 * time.Second
 	defaultMetricPort          = 2112
 	defaultLogLevel            = zerolog.InfoLevel
@@ -69,6 +73,7 @@ func GetDefaultConfigValues() map[string]any {
 		RedisAddress:        defaultRedisAddress,
 		RedisCacheRetention: defaultRedisCacheRetention,
 		RedisCacheSize:      defaultRedisCacheSize,
+		UpdateSetCronTab:    defaultUpdateSetCronTab,
 		DofusDudeTimeout:    defaultDofusDudeTimeout,
 		MetricPort:          defaultMetricPort,
 		LogLevel:            defaultLogLevel.String(),

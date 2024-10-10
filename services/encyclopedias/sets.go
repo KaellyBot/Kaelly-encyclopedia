@@ -19,7 +19,7 @@ func (service *Impl) getSetByID(ctx context.Context, id int32, correlationID,
 	}
 
 	items := service.getSetEquipments(ctx, set.EquipmentIds, correlationID, lg)
-	return mappers.MapSet(set, items, service.equipmentService), nil
+	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
 }
 
 func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
@@ -30,7 +30,7 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
 	}
 
 	items := service.getSetEquipments(ctx, set.EquipmentIds, correlationID, lg)
-	return mappers.MapSet(set, items, service.equipmentService), nil
+	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
 }
 
 func (service *Impl) getSetEquipments(ctx context.Context, equipmentIDs []int32, correlationID,
