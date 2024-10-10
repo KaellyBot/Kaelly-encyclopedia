@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/go-redis/cache/v9"
-	"github.com/redis/go-redis/v9"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 )
 

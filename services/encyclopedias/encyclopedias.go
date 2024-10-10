@@ -6,15 +6,17 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
 func New(broker amqp.MessageBroker, sourceService sources.Service,
-	equipmentService equipments.Service) *Impl {
+	equipmentService equipments.Service, setService sets.Service) *Impl {
 	service := Impl{
 		sourceService:    sourceService,
 		equipmentService: equipmentService,
+		setService:       setService,
 		broker:           broker,
 	}
 	service.getListByFunc = map[amqp.EncyclopediaListRequest_Type]getListFunc{
