@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 
@@ -129,8 +131,30 @@ func imageToBuffer(img image.Image) (*bytes.Buffer, error) {
 }
 
 func uploadImageToImgur(ctx context.Context, buf *bytes.Buffer) (string, error) {
+	// Create a multipart writer
+	reqBody := &bytes.Buffer{}
+	writer := multipart.NewWriter(reqBody)
+
+	// Create the file field for the image data
+	part, errForm := writer.CreateFormFile("image", "image.png")
+	if errForm != nil {
+		return "", errForm
+	}
+
+	// Write the image data to the file field
+	_, errCopy := io.Copy(part, buf)
+	if errCopy != nil {
+		return "", errCopy
+	}
+
+	// Close the multipart writer to finalize the body
+	errClose := writer.Close()
+	if errClose != nil {
+		return "", errClose
+	}
+
 	// Create the request
-	req, errReq := http.NewRequestWithContext(ctx, http.MethodPost, imgurUploadURL, buf)
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodPost, imgurUploadURL, reqBody)
 	if errReq != nil {
 		return "", errReq
 	}
@@ -138,7 +162,7 @@ func uploadImageToImgur(ctx context.Context, buf *bytes.Buffer) (string, error) 
 	// Set necessary headers
 	req.Header.Set("Authorization", fmt.Sprintf("Client-ID %v",
 		viper.GetString(constants.ImgurClientID)))
-	req.Header.Set("Content-Type", "multipart/form-data")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
 	// Send the request
 	client := &http.Client{}

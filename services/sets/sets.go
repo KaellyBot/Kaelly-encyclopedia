@@ -76,22 +76,30 @@ func (service *Impl) buildMissingSets() {
 	}
 
 	log.Info().Int(constants.LogEntityCount, len(missingSets)).Msgf("Set icons to build")
+	var errorCount int
 	for _, set := range missingSets {
-		service.buildMissingSet(ctx, set)
+		errBuild := service.buildMissingSet(ctx, set)
+		if errBuild != nil {
+			log.Warn().Err(errBuild).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
+				Msgf("Error while building set icon, continuing without this set")
+			errorCount++
+		}
 	}
+
+	log.Info().
+		Int(constants.LogEntityCount, len(missingSets)-errorCount).
+		Msg("Set icons built!")
 }
 
-func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry) {
+func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry) error {
 	// Retrieve item icons
 	items := make([]*dodugo.Weapon, 0)
 	for _, itemID := range set.GetEquipmentIds() {
 		item, errItem := service.sourceService.
 			GetEquipmentByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
 		if errItem != nil {
-			log.Warn().Err(errItem).
-				Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
-				Msgf("Error while retrieving item with DofusDude, continuing without this set")
-			return
+			return errItem
 		}
 
 		items = append(items, item)
@@ -100,19 +108,13 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 	// Generate set image
 	buf, errImg := service.buildSetImage(ctx, items)
 	if errImg != nil {
-		log.Warn().Err(errImg).
-			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
-			Msgf("Error while generating set icon, continuing without this set")
-		return
+		return errImg
 	}
 
 	// Upload image through imgur API
 	imageURL, errUpload := uploadImageToImgur(ctx, buf)
 	if errUpload != nil {
-		log.Warn().Err(errUpload).
-			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
-			Msgf("Error while uploading set icon, continuing without this set")
-		return
+		return errUpload
 	}
 
 	// Store imgur link into database
@@ -121,9 +123,8 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 		Icon:        imageURL,
 	})
 	if errSave != nil {
-		log.Warn().Err(errSave).
-			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
-			Msgf("Error while saving set icon, continuing without this set")
-		return
+		return errSave
 	}
+
+	return nil
 }
