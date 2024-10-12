@@ -8,16 +8,18 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
+	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
-func New(repository repository.Repository,
-	sourceService sources.Service) (*Impl, error) {
+func New(repository repository.Repository, sourceService sources.Service,
+	equipmentService equipments.Service) (*Impl, error) {
 	service := Impl{
-		sourceService: sourceService,
-		sets:          make(map[int32]entities.Set),
-		repository:    repository,
+		sourceService:    sourceService,
+		equipmentService: equipmentService,
+		sets:             make(map[int32]entities.Set),
+		repository:       repository,
 	}
 
 	errDB := service.loadSetFromDB()
@@ -55,9 +57,9 @@ func (service *Impl) buildMissingSets() {
 	log.Info().Msgf("Building missing set icons...")
 	ctx := context.Background()
 
-	sets, err := service.sourceService.GetSets(ctx)
-	if err != nil {
-		log.Error().Err(err).Msgf(". Trying later...")
+	sets, errGet := service.sourceService.GetSets(ctx)
+	if errGet != nil {
+		log.Error().Err(errGet).Msgf("Cannot retrieve sets, trying later...")
 		return
 	}
 

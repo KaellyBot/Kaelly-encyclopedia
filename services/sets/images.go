@@ -8,6 +8,7 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/dofusdude/dodugo"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 )
@@ -28,10 +29,28 @@ func (service *Impl) buildSetImage(items []*dodugo.Weapon) (*bytes.Buffer, error
 		return nil, errDefault
 	}
 
+	var ringNumber int
 	for _, item := range items {
 		itemImage := getImageFromItem(item, defaultItem)
-		// TODO determine object type to have right point
-		slotGrid = appendImage(slotGrid, slot, itemImage, image.Point{})
+		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(*item.GetType().Id)
+		if !typeFound {
+			return nil, fmt.Errorf("item %v type not recognized: %v",
+				item.GetAnkamaId(), *item.GetType().Id)
+		}
+
+		index := 0
+		if equipType.ID == amqp.EquipmentType_RING {
+			index = index + ringNumber
+			ringNumber = ringNumber + 1
+		}
+
+		points, pointFound := constants.GetSetPoints()[equipType.ID]
+		if !pointFound {
+			return nil, fmt.Errorf("item %v type have not equivalent point: %v",
+				item.GetAnkamaId(), *item.GetType().Id)
+		}
+
+		slotGrid = appendImage(slotGrid, slot, itemImage, points[index])
 	}
 
 	buf, errBuf := imageToBuffer(slotGrid)
@@ -49,14 +68,14 @@ func appendImage(itemGrid, slot, item image.Image,
 }
 
 func getImageFromURL(url string) (image.Image, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
+	resp, errGet := http.Get(url)
+	if errGet != nil {
+		return nil, errGet
 	}
 	defer resp.Body.Close()
 
 	image, errDecode := imaging.Decode(resp.Body)
-	if err != nil {
+	if errDecode != nil {
 		return nil, errDecode
 	}
 

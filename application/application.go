@@ -52,7 +52,7 @@ func New() (*Impl, error) {
 		return nil, err
 	}
 
-	setService, err := sets.New(setRepo, sourceService)
+	setService, err := sets.New(setRepo, sourceService, equipmentService)
 	if err != nil {
 		return nil, err
 	}
