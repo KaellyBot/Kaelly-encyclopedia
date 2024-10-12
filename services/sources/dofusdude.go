@@ -319,7 +319,7 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int32, language strin
 	return dodugoSet, nil
 }
 
-// Returns sets with minimal informations. No cache applied here
+// Returns sets with minimal informations. No cache applied here.
 func (service *Impl) GetSets(ctx context.Context) ([]dodugo.SetListEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()

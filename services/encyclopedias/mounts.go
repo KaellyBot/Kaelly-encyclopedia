@@ -7,7 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 )
 
-func (service *Impl) getMountByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getMountByID(ctx context.Context, id int32, _,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
 	mount, err := service.sourceService.GetMountByID(ctx, id, lg)
 	if err != nil {

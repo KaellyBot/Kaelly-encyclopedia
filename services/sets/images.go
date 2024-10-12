@@ -2,10 +2,12 @@ package sets
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"image"
 	"net/http"
+	"net/url"
 
 	"github.com/disintegration/imaging"
 	"github.com/dofusdude/dodugo"
@@ -15,7 +17,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-func (service *Impl) buildSetImage(items []*dodugo.Weapon) (*bytes.Buffer, error) {
+func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
+) (*bytes.Buffer, error) {
 	slotGrid, errSlotGrid := imaging.Open("resources/slot-grid.png")
 	if errSlotGrid != nil {
 		return nil, errSlotGrid
@@ -33,7 +36,7 @@ func (service *Impl) buildSetImage(items []*dodugo.Weapon) (*bytes.Buffer, error
 
 	var ringNumber int
 	for _, item := range items {
-		itemImage := getImageFromItem(item, defaultItem)
+		itemImage := getImageFromItem(ctx, item, defaultItem)
 		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(*item.GetType().Id)
 		if !typeFound {
 			return nil, fmt.Errorf("item %v type not recognized: %v",
@@ -42,8 +45,8 @@ func (service *Impl) buildSetImage(items []*dodugo.Weapon) (*bytes.Buffer, error
 
 		index := 0
 		if equipType.ID == amqp.EquipmentType_RING {
-			index = index + ringNumber
-			ringNumber = ringNumber + 1
+			index += ringNumber
+			ringNumber++
 		}
 
 		points, pointFound := constants.GetSetPoints()[equipType.ID]
@@ -69,10 +72,21 @@ func appendImage(itemGrid, slot, item image.Image,
 	return imaging.Overlay(itemGrid, itemSlot, point, 1)
 }
 
-func getImageFromURL(url string) (image.Image, error) {
-	resp, errGet := http.Get(url)
-	if errGet != nil {
-		return nil, errGet
+func getImageFromURL(ctx context.Context, rawURL string) (image.Image, error) {
+	parsedURL, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return nil, err
+	}
+
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodGet, parsedURL.String(), nil)
+	if errReq != nil {
+		return nil, errReq
+	}
+
+	client := &http.Client{}
+	resp, errDo := client.Do(req)
+	if errDo != nil {
+		return nil, errDo
 	}
 	defer resp.Body.Close()
 
@@ -84,10 +98,10 @@ func getImageFromURL(url string) (image.Image, error) {
 	return image, nil
 }
 
-func getImageFromItem(item *dodugo.Weapon,
+func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
 	defaultItem image.Image) image.Image {
 	if item.GetImageUrls().Sd.IsSet() {
-		itemImage, errGetImg := getImageFromURL(*item.GetImageUrls().Sd.Get())
+		itemImage, errGetImg := getImageFromURL(ctx, *item.GetImageUrls().Sd.Get())
 		if errGetImg != nil {
 			log.Warn().Err(errGetImg).
 				Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.GetAnkamaId())).
@@ -114,11 +128,11 @@ func imageToBuffer(img image.Image) (*bytes.Buffer, error) {
 	return buf, nil
 }
 
-func uploadImageToImgur(buf *bytes.Buffer) (string, error) {
+func uploadImageToImgur(ctx context.Context, buf *bytes.Buffer) (string, error) {
 	// Create the request
-	req, err := http.NewRequest("POST", imgurUploadURL, buf)
-	if err != nil {
-		return "", err
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodPost, imgurUploadURL, buf)
+	if errReq != nil {
+		return "", errReq
 	}
 
 	// Set necessary headers
@@ -128,9 +142,9 @@ func uploadImageToImgur(buf *bytes.Buffer) (string, error) {
 
 	// Send the request
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
+	resp, errDo := client.Do(req)
+	if errDo != nil {
+		return "", errDo
 	}
 	defer resp.Body.Close()
 
@@ -140,8 +154,8 @@ func uploadImageToImgur(buf *bytes.Buffer) (string, error) {
 
 	var imgurResponse imgurResponse
 	decoder := json.NewDecoder(resp.Body)
-	if err := decoder.Decode(&imgurResponse); err != nil {
-		return "", err
+	if errDecode := decoder.Decode(&imgurResponse); errDecode != nil {
+		return "", errDecode
 	}
 
 	if !imgurResponse.Success {
