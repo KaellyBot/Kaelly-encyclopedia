@@ -7,6 +7,18 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
+const (
+	imgurUploadURL = "https://api.imgur.com/3/image"
+)
+
+type imgurResponse struct {
+	Data struct {
+		Link string `json:"link"`
+	} `json:"data"`
+	Success bool `json:"success"`
+	Status  int  `json:"status"`
+}
+
 type Service interface {
 	GetSetByDofusDude(ID int32) (entities.Set, bool)
 }

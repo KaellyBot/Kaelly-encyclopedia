@@ -98,7 +98,7 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 	}
 
 	// Generate set image
-	_, errImg := service.buildSetImage(items)
+	buf, errImg := service.buildSetImage(items)
 	if errImg != nil {
 		log.Warn().Err(errImg).
 			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
@@ -106,6 +106,18 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 		return
 	}
 
-	//TODO upload image through imgur API
-	//TODO store imgur link into database
+	// Upload image through imgur API
+	imageURL, errUpload := uploadImageToImgur(buf)
+	if errUpload != nil {
+		log.Warn().Err(errUpload).
+			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
+			Msgf("Error while uploading set icon, continuing without this set")
+		return
+	}
+
+	// Store imgur link into database
+	service.repository.Save(entities.Set{
+		DofusDudeID: set.GetAnkamaId(),
+		Icon:        imageURL,
+	})
 }

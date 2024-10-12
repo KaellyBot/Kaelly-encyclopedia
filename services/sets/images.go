@@ -2,6 +2,7 @@ package sets
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"image"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 func (service *Impl) buildSetImage(items []*dodugo.Weapon) (*bytes.Buffer, error) {
@@ -110,4 +112,41 @@ func imageToBuffer(img image.Image) (*bytes.Buffer, error) {
 	}
 
 	return buf, nil
+}
+
+func uploadImageToImgur(buf *bytes.Buffer) (string, error) {
+	// Create the request
+	req, err := http.NewRequest("POST", imgurUploadURL, buf)
+	if err != nil {
+		return "", err
+	}
+
+	// Set necessary headers
+	req.Header.Set("Authorization", fmt.Sprintf("Client-ID %v",
+		viper.GetString(constants.ImgurClientID)))
+	req.Header.Set("Content-Type", "multipart/form-data")
+
+	// Send the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("imgur API error, status code: %d", resp.StatusCode)
+	}
+
+	var imgurResponse imgurResponse
+	decoder := json.NewDecoder(resp.Body)
+	if err := decoder.Decode(&imgurResponse); err != nil {
+		return "", err
+	}
+
+	if !imgurResponse.Success {
+		return "", fmt.Errorf("imgur API error, inner status code: %d", imgurResponse.Status)
+	}
+
+	return imgurResponse.Data.Link, nil
 }

@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	GetSets() ([]entities.Set, error)
+	Save(entity entities.Set) error
 }
 
 type Impl struct {
