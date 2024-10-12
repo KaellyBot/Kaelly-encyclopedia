@@ -319,6 +319,23 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int32, language strin
 	return dodugoSet, nil
 }
 
+// Returns sets with minimal informations. No cache applied here
+func (service *Impl) GetSets(ctx context.Context) ([]dodugo.SetListEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	resp, r, err := service.dofusDudeClient.SetsAPI.
+		GetSetsList(ctx, constants.DofusDudeDefaultLanguage, constants.DofusDudeGame).
+		PageNumber(1).PageSize(-1).FieldsSet([]string{"equipment_ids"}).
+		Execute()
+	if err != nil && r == nil {
+		return nil, err
+	}
+	defer r.Body.Close()
+
+	return resp.GetItems(), nil
+}
+
 func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,
 	language string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)

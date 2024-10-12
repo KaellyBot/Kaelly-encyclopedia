@@ -42,6 +42,7 @@ type Service interface {
 	GetQuestItemByID(ctx context.Context, questItemID int32, lg string) (*dodugo.Resource, error)
 	GetResourceByID(ctx context.Context, resourceID int32, lg string) (*dodugo.Resource, error)
 	GetSetByID(ctx context.Context, setID int32, lg string) (*dodugo.EquipmentSet, error)
+	GetSets(ctx context.Context) ([]dodugo.SetListEntry, error)
 
 	GetEquipmentByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetMountByQuery(ctx context.Context, query, lg string) (*dodugo.Mount, error)

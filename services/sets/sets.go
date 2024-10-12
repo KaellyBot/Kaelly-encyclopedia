@@ -1,6 +1,10 @@
 package sets
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/dofusdude/dodugo"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
@@ -48,5 +52,58 @@ func (service *Impl) loadSetFromDB() error {
 }
 
 func (service *Impl) buildMissingSets() {
-	// TODO sets, err := service.sourceService.GetSets()
+	log.Info().Msgf("Building missing set icons...")
+	ctx := context.Background()
+
+	sets, err := service.sourceService.GetSets(ctx)
+	if err != nil {
+		log.Error().Err(err).Msgf(". Trying later...")
+		return
+	}
+
+	missingSets := make([]dodugo.SetListEntry, 0)
+	for _, set := range sets {
+		if _, found := service.sets[set.GetAnkamaId()]; !found {
+			missingSets = append(missingSets, set)
+		}
+	}
+
+	if len(missingSets) == 0 {
+		log.Info().Int(constants.LogEntityCount, len(missingSets)).Msgf("Set icons are all up-to-date")
+		return
+	}
+
+	log.Info().Int(constants.LogEntityCount, len(missingSets)).Msgf("Set icons to build")
+	for _, set := range missingSets {
+		service.buildMissingSet(ctx, set)
+	}
+}
+
+func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry) {
+	// Retrieve item icons
+	items := make([]*dodugo.Weapon, 0)
+	for _, itemID := range set.GetEquipmentIds() {
+		item, errItem := service.sourceService.
+			GetEquipmentByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
+		if errItem != nil {
+			log.Warn().Err(errItem).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
+				Msgf("Error while retrieving item with DofusDude, continuing without this set")
+			return
+		}
+
+		items = append(items, item)
+	}
+
+	// Generate set image
+	_, errImg := service.buildSetImage(items)
+	if errImg != nil {
+		log.Warn().Err(errImg).
+			Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
+			Msgf("Error while generating set icon, continuing without this set")
+		return
+	}
+
+	//TODO upload image through imgur API
+	//TODO store imgur link into database
 }

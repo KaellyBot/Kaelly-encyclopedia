@@ -5,6 +5,7 @@ go 1.22
 //replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
+	github.com/disintegration/imaging v1.6.2
 	github.com/dofusdude/dodugo v0.9.1
 	github.com/go-co-op/gocron/v2 v2.12.1
 	github.com/go-redis/cache/v9 v9.0.0
@@ -55,6 +56,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
