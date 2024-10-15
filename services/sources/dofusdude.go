@@ -333,7 +333,7 @@ func (service *Impl) GetSets(ctx context.Context) ([]dodugo.SetListEntry, error)
 	}
 	defer r.Body.Close()
 
-	return resp.GetItems(), nil
+	return resp.GetSets(), nil
 }
 
 func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,

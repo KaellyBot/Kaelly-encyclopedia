@@ -6,7 +6,7 @@ go 1.22
 
 require (
 	github.com/disintegration/imaging v1.6.2
-	github.com/dofusdude/dodugo v0.9.1
+	github.com/dofusdude/dodugo v0.9.2
 	github.com/go-co-op/gocron/v2 v2.12.1
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/kaellybot/kaelly-amqp v0.0.6-beta2

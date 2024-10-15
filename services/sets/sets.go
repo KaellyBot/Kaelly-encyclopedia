@@ -2,6 +2,7 @@ package sets
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/dofusdude/dodugo"
@@ -11,6 +12,10 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
+)
+
+var (
+	errCosmeticSet = errors.New("Set is probably a cosmetic set since no equipments could be retrieved")
 )
 
 func New(repository repository.Repository, sourceService sources.Service,
@@ -28,6 +33,8 @@ func New(repository repository.Repository, sourceService sources.Service,
 	}
 
 	service.sourceService.ListenGameEvent(service.buildMissingSets)
+	// TODO to remove
+	service.buildMissingSets()
 	return &service, nil
 }
 
@@ -90,6 +97,9 @@ func (service *Impl) buildMissingSets() {
 	log.Info().
 		Int(constants.LogEntityCount, len(missingSets)-errorCount).
 		Msg("Set icons built!")
+
+	errLoad := service.loadSetFromDB()
+	log.Warn().Err(errLoad).Msg("Could not reload set icons, please restart to take them in account")
 }
 
 func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry) error {
@@ -102,7 +112,13 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 			return errItem
 		}
 
-		items = append(items, item)
+		if item != nil {
+			items = append(items, item)
+		}
+	}
+
+	if len(items) == 0 {
+		return errCosmeticSet
 	}
 
 	// Generate set image

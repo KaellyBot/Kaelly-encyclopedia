@@ -21,8 +21,8 @@ github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f h1:lO4WD4F/r
 github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f/go.mod h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=
 github.com/disintegration/imaging v1.6.2 h1:w1LecBlG2Lnp8B3jk5zSuNqd7b4DXhcjwek1ei82L+c=
 github.com/disintegration/imaging v1.6.2/go.mod h1:44/5580QXChDfwIclfc/PCwrr44amcmDAg8hxG0Ewe4=
-github.com/dofusdude/dodugo v0.9.1 h1:fJQuXh449f1weOjKpL25PKUA9BNrM8azOjKvsn1AYvY=
-github.com/dofusdude/dodugo v0.9.1/go.mod h1:v4q9CsVpJyOWmaETuMPlEGwuRePKAVb2OGWR3bbINYI=
+github.com/dofusdude/dodugo v0.9.2 h1:3hBS3InyoaFCv05jewYxyPJigpH0Ee0GsVpegqQhLQQ=
+github.com/dofusdude/dodugo v0.9.2/go.mod h1:v4q9CsVpJyOWmaETuMPlEGwuRePKAVb2OGWR3bbINYI=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
