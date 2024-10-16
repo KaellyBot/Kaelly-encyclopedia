@@ -7,8 +7,6 @@ import (
 )
 
 const (
-	MinimumSetBonusItems = 2
-
 	setItemMarginPx = 5
 	setItemSizePx   = 200
 	setFirstCell    = setItemMarginPx

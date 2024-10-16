@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	errCosmeticSet = errors.New("Set is probably a cosmetic set since no equipments could be retrieved")
+	errCosmeticSet = errors.New("set is probably a cosmetic set since no equipments could be retrieved")
 )
 
 func New(repository repository.Repository, sourceService sources.Service,
@@ -34,7 +34,7 @@ func New(repository repository.Repository, sourceService sources.Service,
 
 	service.sourceService.ListenGameEvent(service.buildMissingSets)
 	// TODO to remove
-	service.buildMissingSets()
+	//service.buildMissingSets()
 	return &service, nil
 }
 
