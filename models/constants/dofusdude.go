@@ -12,6 +12,7 @@ const (
 
 func GetSupportedTypeEnums() []string {
 	return []string{
+		// Equipments
 		"shield",
 		"hat",
 		"cloak",
@@ -36,6 +37,22 @@ func GetSupportedTypeEnums() []string {
 		"pet",
 		"petsmount",
 		"mount",
+
+		// Cosmetics
+		"ceremonial-cape",
+		"ceremonial-hat",
+		"ceremonial-pet",
+		"ceremonial-petsmount",
+		"ceremonial-shield",
+		"ceremonial-weapon",
+		"costume",
+		"dragoturkey-harnesses",
+		"living-object",
+		"miscellaneous-ceremonial-item",
+		"rhineetle-harnesses",
+		"seemyool-harnesses",
+		"shoulder-pads",
+		"wings",
 	}
 }
 
