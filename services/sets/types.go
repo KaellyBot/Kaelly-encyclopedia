@@ -19,6 +19,12 @@ type imgurResponse struct {
 	Status  int  `json:"status"`
 }
 
+type itemIcon struct {
+	AnkamaID int32
+	TypeID   int32
+	IconURL  *string
+}
+
 type Service interface {
 	GetSetByDofusDude(ID int32) (entities.Set, bool)
 }

@@ -82,6 +82,71 @@ func (service *Impl) GetConsumableByID(ctx context.Context, itemID int32, langua
 	return dodugoItem, nil
 }
 
+func (service *Impl) SearchCosmetics(ctx context.Context, query,
+	language string) ([]dodugo.ItemListEntry, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var items []dodugo.ItemListEntry
+	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &items) {
+		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
+			GetCosmeticsSearch(ctx, language, constants.DofusDudeGame).
+			Query(query).Limit(constants.DofusDudeLimit).Execute()
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		items = resp
+	}
+
+	return items, nil
+}
+
+func (service *Impl) GetCosmeticByQuery(ctx context.Context, query, language string,
+) (*dodugo.Cosmetic, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	values, err := service.SearchCosmetics(ctx, query, language)
+	if err != nil {
+		return nil, err
+	}
+	if len(values) == 0 {
+		return nil, ErrNotFound
+	}
+
+	// We trust the omnisearch by taking the first one in the list
+	resp, err := service.GetCosmeticByID(ctx, values[0].GetAnkamaId(), language)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int32, language string,
+) (*dodugo.Cosmetic, error) {
+	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
+	defer cancel()
+
+	var dodugoItem *dodugo.Cosmetic
+	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
+	if !service.getElementFromCache(ctx, key, &dodugoItem) {
+		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
+			GetCosmeticsSingle(ctx, language, itemID, constants.DofusDudeGame).Execute()
+		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
+			return nil, err
+		}
+		defer r.Body.Close()
+		service.putElementToCache(ctx, key, resp)
+		dodugoItem = resp
+	}
+
+	return dodugoItem, nil
+}
+
 func (service *Impl) SearchEquipments(ctx context.Context, query,
 	language string) ([]dodugo.ItemListEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)

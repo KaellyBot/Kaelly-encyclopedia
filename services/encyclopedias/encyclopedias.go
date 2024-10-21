@@ -31,6 +31,10 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 			GetItemByID:    service.getItemByID,
 			GetItemByQuery: service.getItemByQuery,
 		},
+		amqp.ItemType_COSMETIC: {
+			GetItemByID:    service.getCosmeticByID,
+			GetItemByQuery: service.getCosmeticByQuery,
+		},
 		amqp.ItemType_EQUIPMENT: {
 			GetItemByID:    service.getEquipmentByID,
 			GetItemByQuery: service.getEquipmentByQuery,

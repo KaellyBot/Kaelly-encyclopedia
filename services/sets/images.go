@@ -12,14 +12,13 @@ import (
 	"net/url"
 
 	"github.com/disintegration/imaging"
-	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
+func (service *Impl) buildSetImage(ctx context.Context, items []itemIcon,
 ) (*bytes.Buffer, error) {
 	slotGrid, errSlotGrid := imaging.Open("resources/slot-grid.png")
 	if errSlotGrid != nil {
@@ -39,10 +38,10 @@ func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
 	var ringNumber int
 	for _, item := range items {
 		itemImage := getImageFromItem(ctx, item, defaultItem)
-		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(*item.GetType().Id)
+		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(item.TypeID)
 		if !typeFound {
 			return nil, fmt.Errorf("item %v type not recognized: %v",
-				item.GetAnkamaId(), *item.GetType().Id)
+				item.AnkamaID, item.TypeID)
 		}
 
 		index := 0
@@ -54,7 +53,7 @@ func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
 		points, pointFound := constants.GetSetPoints()[equipType.ID]
 		if !pointFound {
 			return nil, fmt.Errorf("item %v type have not equivalent point: %v",
-				item.GetAnkamaId(), *item.GetType().Id)
+				item.AnkamaID, item.TypeID)
 		}
 
 		slotGrid = appendImage(slotGrid, slot, itemImage, points[index])
@@ -74,7 +73,8 @@ func appendImage(itemGrid, slot, item image.Image,
 	return imaging.Overlay(itemGrid, itemSlot, point, 1)
 }
 
-func getImageFromURL(ctx context.Context, rawURL string) (image.Image, error) {
+func getImageFromURL(ctx context.Context, rawURL string,
+) (image.Image, error) {
 	parsedURL, err := url.ParseRequestURI(rawURL)
 	if err != nil {
 		return nil, err
@@ -100,13 +100,13 @@ func getImageFromURL(ctx context.Context, rawURL string) (image.Image, error) {
 	return image, nil
 }
 
-func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
+func getImageFromItem(ctx context.Context, item itemIcon,
 	defaultItem image.Image) image.Image {
-	if item.GetImageUrls().Sd.IsSet() {
-		itemImage, errGetImg := getImageFromURL(ctx, *item.GetImageUrls().Sd.Get())
+	if item.IconURL != nil {
+		itemImage, errGetImg := getImageFromURL(ctx, *item.IconURL)
 		if errGetImg != nil {
 			log.Warn().Err(errGetImg).
-				Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.GetAnkamaId())).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.AnkamaID)).
 				Msgf("Cannot retrieve item SD icon with DofusDude, continuing with default one")
 			return defaultItem
 		}
@@ -115,7 +115,7 @@ func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
 	}
 
 	log.Warn().
-		Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.GetAnkamaId())).
+		Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.AnkamaID)).
 		Msgf("Item SD icon not set with DofusDude, continuing with default one")
 	return defaultItem
 }

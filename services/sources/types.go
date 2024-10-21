@@ -31,12 +31,14 @@ type Service interface {
 	GetIngredientType(ingredientType string) amqp.IngredientType
 
 	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.GetGameSearch200ResponseInner, error)
+	SearchCosmetics(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchEquipments(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
 	SearchMounts(ctx context.Context, query, lg string) ([]dodugo.MountListEntry, error)
 	SearchSets(ctx context.Context, query, lg string) ([]dodugo.SetListEntry, error)
 	SearchAlmanaxEffects(ctx context.Context, query, lg string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error)
 
 	GetConsumableByID(ctx context.Context, consumableID int32, lg string) (*dodugo.Resource, error)
+	GetCosmeticByID(ctx context.Context, cosmeticID int32, lg string) (*dodugo.Cosmetic, error)
 	GetEquipmentByID(ctx context.Context, equipmentID int32, lg string) (*dodugo.Weapon, error)
 	GetMountByID(ctx context.Context, mountID int32, lg string) (*dodugo.Mount, error)
 	GetQuestItemByID(ctx context.Context, questItemID int32, lg string) (*dodugo.Resource, error)
@@ -44,6 +46,7 @@ type Service interface {
 	GetSetByID(ctx context.Context, setID int32, lg string) (*dodugo.EquipmentSet, error)
 	GetSets(ctx context.Context) ([]dodugo.SetListEntry, error)
 
+	GetCosmeticByQuery(ctx context.Context, query, lg string) (*dodugo.Cosmetic, error)
 	GetEquipmentByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetMountByQuery(ctx context.Context, query, lg string) (*dodugo.Mount, error)
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)

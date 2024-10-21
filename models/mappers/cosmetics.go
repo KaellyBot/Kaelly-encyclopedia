@@ -9,17 +9,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingredient,
+func MapCosmetic(item *dodugo.Cosmetic, ingredientItems map[int32]*constants.Ingredient,
 ) *amqp.EncyclopediaItemAnswer {
-	var set *amqp.EncyclopediaItemAnswer_Equipment_Set
-	if item.HasParentSet() {
-		parentSet := item.GetParentSet()
-		set = &amqp.EncyclopediaItemAnswer_Equipment_Set{
-			Id:   fmt.Sprintf("%v", parentSet.GetId()),
-			Name: parentSet.GetName(),
-		}
-	}
-
 	effects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
 	for _, effect := range item.GetEffects() {
 		effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
@@ -63,10 +54,10 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 		icon = item.GetImageUrls().Hq.Get()
 	}
 
-	// TODO condition
+	// TODO condition, set
 
 	return &amqp.EncyclopediaItemAnswer{
-		Type: amqp.ItemType_EQUIPMENT,
+		Type: amqp.ItemType_COSMETIC,
 		Equipment: &amqp.EncyclopediaItemAnswer_Equipment{
 			Id:          fmt.Sprintf("%v", item.GetAnkamaId()),
 			Name:        item.GetName(),
@@ -75,7 +66,6 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Icon:        *icon,
 			Level:       int64(item.GetLevel()),
 			Pods:        int64(item.GetPods()),
-			Set:         set,
 			Effects:     effects,
 			Recipe:      recipe,
 		},
