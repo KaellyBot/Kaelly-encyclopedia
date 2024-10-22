@@ -100,13 +100,13 @@ func (service *Impl) buildMissingSets() {
 func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry,
 ) error {
 	// Retrieve item icons
-	itemIcons, errExtract := service.extractItemIcons(ctx, set)
+	items, errExtract := service.extractItemIcons(ctx, set)
 	if errExtract != nil {
 		return errExtract
 	}
 
 	// Generate set image
-	buf, errImg := service.buildSetImage(ctx, itemIcons)
+	buf, errImg := service.buildSetImage(ctx, items)
 	if errImg != nil {
 		return errImg
 	}
@@ -130,10 +130,9 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 }
 
 func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEntry,
-) ([]itemIcon, error) {
-	items := make([]itemIcon, 0)
+) ([]*dodugo.Weapon, error) {
+	items := make([]*dodugo.Weapon, 0)
 	for _, itemID := range set.GetEquipmentIds() {
-		var item itemIcon
 		if set.GetIsCosmetic() {
 			cosmetic, errCosmetic := service.sourceService.
 				GetCosmeticByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
@@ -141,11 +140,7 @@ func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEnt
 				return nil, errCosmetic
 			}
 
-			item = itemIcon{
-				AnkamaID: cosmetic.GetAnkamaId(),
-				TypeID:   *cosmetic.Type.Id,
-				IconURL:  getSDIcon(cosmetic.GetImageUrls()),
-			}
+			items = append(items, cosmetic)
 		} else {
 			equipment, errItem := service.sourceService.
 				GetEquipmentByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
@@ -153,23 +148,9 @@ func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEnt
 				return nil, errItem
 			}
 
-			item = itemIcon{
-				AnkamaID: equipment.GetAnkamaId(),
-				TypeID:   *equipment.Type.Id,
-				IconURL:  getSDIcon(equipment.GetImageUrls()),
-			}
+			items = append(items, equipment)
 		}
-
-		items = append(items, item)
 	}
 
 	return items, nil
-}
-
-func getSDIcon(imageURLs dodugo.ImageUrls) *string {
-	if imageURLs.Sd.IsSet() {
-		return imageURLs.Sd.Get()
-	}
-
-	return nil
 }

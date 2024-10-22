@@ -38,7 +38,7 @@ type Service interface {
 	SearchAlmanaxEffects(ctx context.Context, query, lg string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error)
 
 	GetConsumableByID(ctx context.Context, consumableID int32, lg string) (*dodugo.Resource, error)
-	GetCosmeticByID(ctx context.Context, cosmeticID int32, lg string) (*dodugo.Cosmetic, error)
+	GetCosmeticByID(ctx context.Context, cosmeticID int32, lg string) (*dodugo.Weapon, error)
 	GetEquipmentByID(ctx context.Context, equipmentID int32, lg string) (*dodugo.Weapon, error)
 	GetMountByID(ctx context.Context, mountID int32, lg string) (*dodugo.Mount, error)
 	GetQuestItemByID(ctx context.Context, questItemID int32, lg string) (*dodugo.Resource, error)
@@ -46,7 +46,7 @@ type Service interface {
 	GetSetByID(ctx context.Context, setID int32, lg string) (*dodugo.EquipmentSet, error)
 	GetSets(ctx context.Context) ([]dodugo.SetListEntry, error)
 
-	GetCosmeticByQuery(ctx context.Context, query, lg string) (*dodugo.Cosmetic, error)
+	GetCosmeticByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetEquipmentByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetMountByQuery(ctx context.Context, query, lg string) (*dodugo.Mount, error)
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)

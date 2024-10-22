@@ -12,13 +12,14 @@ import (
 	"net/url"
 
 	"github.com/disintegration/imaging"
+	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
-func (service *Impl) buildSetImage(ctx context.Context, items []itemIcon,
+func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
 ) (*bytes.Buffer, error) {
 	slotGrid, errSlotGrid := imaging.Open("resources/slot-grid.png")
 	if errSlotGrid != nil {
@@ -38,10 +39,10 @@ func (service *Impl) buildSetImage(ctx context.Context, items []itemIcon,
 	var ringNumber int
 	for _, item := range items {
 		itemImage := getImageFromItem(ctx, item, defaultItem)
-		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(item.TypeID)
+		equipType, typeFound := service.equipmentService.GetTypeByDofusDude(*item.GetType().Id)
 		if !typeFound {
 			return nil, fmt.Errorf("item %v type not recognized: %v",
-				item.AnkamaID, item.TypeID)
+				item.GetAnkamaId(), *item.GetType().Id)
 		}
 
 		index := 0
@@ -53,7 +54,7 @@ func (service *Impl) buildSetImage(ctx context.Context, items []itemIcon,
 		points, pointFound := constants.GetSetPoints()[equipType.ID]
 		if !pointFound {
 			return nil, fmt.Errorf("item %v type have not equivalent point: %v",
-				item.AnkamaID, item.TypeID)
+				item.GetAnkamaId(), *item.GetType().Id)
 		}
 
 		slotGrid = appendImage(slotGrid, slot, itemImage, points[index])
@@ -100,13 +101,13 @@ func getImageFromURL(ctx context.Context, rawURL string,
 	return image, nil
 }
 
-func getImageFromItem(ctx context.Context, item itemIcon,
+func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
 	defaultItem image.Image) image.Image {
-	if item.IconURL != nil {
-		itemImage, errGetImg := getImageFromURL(ctx, *item.IconURL)
+	if item.GetImageUrls().Sd.IsSet() {
+		itemImage, errGetImg := getImageFromURL(ctx, *item.GetImageUrls().Sd.Get())
 		if errGetImg != nil {
 			log.Warn().Err(errGetImg).
-				Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.AnkamaID)).
+				Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.GetAnkamaId())).
 				Msgf("Cannot retrieve item SD icon with DofusDude, continuing with default one")
 			return defaultItem
 		}
@@ -115,7 +116,7 @@ func getImageFromItem(ctx context.Context, item itemIcon,
 	}
 
 	log.Warn().
-		Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.AnkamaID)).
+		Str(constants.LogAnkamaID, fmt.Sprintf("%v", item.GetAnkamaId())).
 		Msgf("Item SD icon not set with DofusDude, continuing with default one")
 	return defaultItem
 }

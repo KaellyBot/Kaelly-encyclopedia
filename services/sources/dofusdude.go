@@ -105,7 +105,7 @@ func (service *Impl) SearchCosmetics(ctx context.Context, query,
 }
 
 func (service *Impl) GetCosmeticByQuery(ctx context.Context, query, language string,
-) (*dodugo.Cosmetic, error) {
+) (*dodugo.Weapon, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
@@ -127,11 +127,11 @@ func (service *Impl) GetCosmeticByQuery(ctx context.Context, query, language str
 }
 
 func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int32, language string,
-) (*dodugo.Cosmetic, error) {
+) (*dodugo.Weapon, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var dodugoItem *dodugo.Cosmetic
+	var dodugoItem *dodugo.Weapon
 	key := buildItemKey(item, fmt.Sprintf("%v", itemID), language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoItem) {
 		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
@@ -141,7 +141,28 @@ func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int32, language
 		}
 		defer r.Body.Close()
 		service.putElementToCache(ctx, key, resp)
-		dodugoItem = resp
+		isWeapon := false
+		dodugoItem = &dodugo.Weapon{
+			AnkamaId:               resp.AnkamaId,
+			Name:                   resp.Name,
+			Description:            resp.Description,
+			Type:                   resp.Type,
+			IsWeapon:               &isWeapon,
+			Level:                  resp.Level,
+			Pods:                   resp.Pods,
+			ImageUrls:              resp.ImageUrls,
+			Effects:                resp.Effects,
+			Conditions:             resp.Conditions,
+			ConditionTree:          resp.ConditionTree,
+			Recipe:                 resp.Recipe,
+			ParentSet:              resp.ParentSet,
+			CriticalHitProbability: nil,
+			CriticalHitBonus:       nil,
+			IsTwoHanded:            nil,
+			MaxCastPerTurn:         nil,
+			ApCost:                 nil,
+			Range:                  nil,
+		}
 	}
 
 	return dodugoItem, nil
