@@ -18,7 +18,7 @@ func (service *Impl) getSetByID(ctx context.Context, id int32, correlationID,
 		return nil, err
 	}
 
-	items := service.getSetEquipments(ctx, set.EquipmentIds, correlationID, lg)
+	items := service.getSetEquipments(ctx, set, correlationID, lg)
 	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
 }
 
@@ -29,15 +29,22 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
 		return nil, err
 	}
 
-	items := service.getSetEquipments(ctx, set.EquipmentIds, correlationID, lg)
+	items := service.getSetEquipments(ctx, set, correlationID, lg)
 	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
 }
 
-func (service *Impl) getSetEquipments(ctx context.Context, equipmentIDs []int32, correlationID,
+func (service *Impl) getSetEquipments(ctx context.Context, set *dodugo.EquipmentSet, correlationID,
 	lg string) map[int32]*dodugo.Weapon {
+	var getItemByID func(ctx context.Context, equipmentID int32, lg string) (*dodugo.Weapon, error)
+	if set.GetIsCosmetic() {
+		getItemByID = service.sourceService.GetCosmeticByID
+	} else {
+		getItemByID = service.sourceService.GetEquipmentByID
+	}
+
 	items := make(map[int32]*dodugo.Weapon)
-	for _, itemID := range equipmentIDs {
-		item, errItem := service.sourceService.GetEquipmentByID(ctx, itemID, lg)
+	for _, itemID := range set.GetEquipmentIds() {
+		item, errItem := getItemByID(ctx, itemID, lg)
 		if errItem != nil {
 			log.Error().Err(errItem).
 				Str(constants.LogCorrelationID, correlationID).
