@@ -28,7 +28,6 @@ type GameEventHandler func()
 
 type Service interface {
 	GetItemType(itemType string) amqp.ItemType
-	GetIngredientType(ingredientType string) amqp.IngredientType
 
 	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.GetGameSearch200ResponseInner, error)
 	SearchCosmetics(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
@@ -64,5 +63,4 @@ type Impl struct {
 	storeService    stores.Service
 	httpTimeout     time.Duration
 	itemTypes       map[string]amqp.ItemType
-	ingredientTypes map[string]amqp.IngredientType
 }

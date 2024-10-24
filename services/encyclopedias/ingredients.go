@@ -32,7 +32,7 @@ func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeE
 
 func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.RecipeEntry,
 	correlationID, lg string) (*constants.Ingredient, error) {
-	itemType := service.sourceService.GetIngredientType(ingredient.GetItemSubtype())
+	itemType := service.sourceService.GetItemType(ingredient.GetItemSubtype())
 	getIngredientByFunc, found := service.getIngredientByFuncs[itemType]
 	if !found {
 		return nil, sources.ErrNotFound
@@ -56,7 +56,7 @@ func (service *Impl) getConsumableIngredientByID(ctx context.Context, id int32, 
 	return &constants.Ingredient{
 		ID:   fmt.Sprintf("%v", id),
 		Name: consumable.GetName(),
-		Type: amqp.IngredientType_CONSUMABLE,
+		Type: amqp.ItemType_CONSUMABLE_TYPE,
 	}, nil
 }
 
@@ -70,7 +70,7 @@ func (service *Impl) getEquipmentIngredientByID(ctx context.Context, id int32, _
 	return &constants.Ingredient{
 		ID:   fmt.Sprintf("%v", id),
 		Name: equipment.GetName(),
-		Type: amqp.IngredientType_EQUIPMENT_INGREDIENT,
+		Type: amqp.ItemType_EQUIPMENT_TYPE,
 	}, nil
 }
 
@@ -84,7 +84,7 @@ func (service *Impl) getQuestItemIngredientByID(ctx context.Context, id int32, _
 	return &constants.Ingredient{
 		ID:   fmt.Sprintf("%v", id),
 		Name: consumable.GetName(),
-		Type: amqp.IngredientType_QUEST_ITEM,
+		Type: amqp.ItemType_QUEST_ITEM_TYPE,
 	}, nil
 }
 
@@ -98,6 +98,6 @@ func (service *Impl) getResourceIngredientByID(ctx context.Context, id int32, _,
 	return &constants.Ingredient{
 		ID:   fmt.Sprintf("%v", id),
 		Name: resource.GetName(),
-		Type: amqp.IngredientType_RESOURCE,
+		Type: amqp.ItemType_RESOURCE_TYPE,
 	}, nil
 }

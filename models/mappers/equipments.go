@@ -41,7 +41,7 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 					Msgf("Cannot build entire recipe (missing ingredient), continuing with degraded mode")
 				ingredient = &constants.Ingredient{
 					Name: formattedItemIDString,
-					Type: amqp.IngredientType_ANY_INGREDIENT,
+					Type: amqp.ItemType_ANY_ITEM_TYPE,
 				}
 			}
 
@@ -66,7 +66,7 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 	// TODO condition
 
 	return &amqp.EncyclopediaItemAnswer{
-		Type: amqp.ItemType_EQUIPMENT,
+		Type: amqp.ItemType_EQUIPMENT_TYPE,
 		Equipment: &amqp.EncyclopediaItemAnswer_Equipment{
 			Id:          fmt.Sprintf("%v", item.GetAnkamaId()),
 			Name:        item.GetName(),

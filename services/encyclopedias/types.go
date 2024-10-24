@@ -46,5 +46,5 @@ type Impl struct {
 	broker               amqp.MessageBroker
 	getListByFunc        map[amqp.EncyclopediaListRequest_Type]getListFunc
 	getItemByFuncs       map[amqp.ItemType]getItemFuncs
-	getIngredientByFuncs map[amqp.IngredientType]getIngredientByIDFunc
+	getIngredientByFuncs map[amqp.ItemType]getIngredientByIDFunc
 }

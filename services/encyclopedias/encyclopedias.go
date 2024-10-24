@@ -19,6 +19,7 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 		setService:       setService,
 		broker:           broker,
 	}
+
 	service.getListByFunc = map[amqp.EncyclopediaListRequest_Type]getListFunc{
 		amqp.EncyclopediaListRequest_UNKNOWN:        nil,
 		amqp.EncyclopediaListRequest_ITEM:           service.getItemList,
@@ -26,16 +27,17 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 		amqp.EncyclopediaListRequest_ALMANAX_EFFECT: service.getAlmanaxEffectList,
 	}
 
+	//nolint:exhaustive // Not all types can be requested at this moment.
 	service.getItemByFuncs = map[amqp.ItemType]getItemFuncs{
-		amqp.ItemType_ANY_ITEM: {
+		amqp.ItemType_ANY_ITEM_TYPE: {
 			GetItemByID:    service.getItemByID,
 			GetItemByQuery: service.getItemByQuery,
 		},
-		amqp.ItemType_COSMETIC: {
+		amqp.ItemType_COSMETIC_TYPE: {
 			GetItemByID:    service.getCosmeticByID,
 			GetItemByQuery: service.getCosmeticByQuery,
 		},
-		amqp.ItemType_EQUIPMENT: {
+		amqp.ItemType_EQUIPMENT_TYPE: {
 			GetItemByID:    service.getEquipmentByID,
 			GetItemByQuery: service.getEquipmentByQuery,
 		},
@@ -43,18 +45,19 @@ func New(broker amqp.MessageBroker, sourceService sources.Service,
 			GetItemByID:    service.getMountByID,
 			GetItemByQuery: service.getMountByQuery,
 		},
-		amqp.ItemType_SET: {
+		amqp.ItemType_SET_TYPE: {
 			GetItemByID:    service.getSetByID,
 			GetItemByQuery: service.getSetByQuery,
 		},
 	}
 
-	service.getIngredientByFuncs = map[amqp.IngredientType]getIngredientByIDFunc{
-		amqp.IngredientType_ANY_INGREDIENT:       nil,
-		amqp.IngredientType_CONSUMABLE:           service.getConsumableIngredientByID,
-		amqp.IngredientType_EQUIPMENT_INGREDIENT: service.getEquipmentIngredientByID,
-		amqp.IngredientType_QUEST_ITEM:           service.getQuestItemIngredientByID,
-		amqp.IngredientType_RESOURCE:             service.getResourceIngredientByID,
+	//nolint:exhaustive // Ingredient types possibility is exhaustive here.
+	service.getIngredientByFuncs = map[amqp.ItemType]getIngredientByIDFunc{
+		amqp.ItemType_ANY_ITEM_TYPE:   nil,
+		amqp.ItemType_CONSUMABLE_TYPE: service.getConsumableIngredientByID,
+		amqp.ItemType_EQUIPMENT_TYPE:  service.getEquipmentIngredientByID,
+		amqp.ItemType_QUEST_ITEM_TYPE: service.getQuestItemIngredientByID,
+		amqp.ItemType_RESOURCE_TYPE:   service.getResourceIngredientByID,
 	}
 
 	return &service

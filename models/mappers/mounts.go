@@ -24,7 +24,7 @@ func MapMount(item *dodugo.Mount) *amqp.EncyclopediaItemAnswer {
 	}
 
 	return &amqp.EncyclopediaItemAnswer{
-		Type: amqp.ItemType_EQUIPMENT,
+		Type: amqp.ItemType_EQUIPMENT_TYPE,
 		Equipment: &amqp.EncyclopediaItemAnswer_Equipment{
 			Id:        fmt.Sprintf("%v", item.GetAnkamaId()),
 			Name:      item.GetName(),

@@ -30,7 +30,8 @@ func (service *Impl) almanaxRequest(ctx context.Context, message *amqp.RabbitMQM
 		return
 	}
 
-	service.publishAlmanaxAnswerSuccess(correlationID, mappers.MapAlmanax(almanax), message.Language)
+	response := mappers.MapAlmanax(almanax, service.sourceService)
+	service.publishAlmanaxAnswerSuccess(correlationID, response, message.Language)
 }
 
 func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
@@ -77,7 +78,8 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 		return
 	}
 
-	service.publishAlmanaxEffectAnswerSuccess(correlationID, mappers.MapAlmanax(almanax), message.Language)
+	response := mappers.MapAlmanax(almanax, service.sourceService)
+	service.publishAlmanaxEffectAnswerSuccess(correlationID, response, message.Language)
 }
 
 func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
@@ -100,7 +102,7 @@ func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.R
 		return
 	}
 
-	answer := mappers.MapAlmanaxResource(almanax, request.Duration)
+	answer := mappers.MapAlmanaxResource(almanax, request.Duration, service.sourceService)
 	service.publishAlmanaxResourceAnswerSuccess(correlationID, answer, message.Language)
 }
 

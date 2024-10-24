@@ -18,22 +18,10 @@ func (service *Impl) GetItemType(itemType string) amqp.ItemType {
 		log.Warn().
 			Str(constants.LogItemType, itemType).
 			Msgf("Cannot find dofusDude itemType match, returning amqp.ItemType_ANY_ITEM")
-		return amqp.ItemType_ANY_ITEM
+		return amqp.ItemType_ANY_ITEM_TYPE
 	}
 
 	return amqpItemType
-}
-
-func (service *Impl) GetIngredientType(itemType string) amqp.IngredientType {
-	amqpIngredientType, found := service.ingredientTypes[itemType]
-	if !found {
-		log.Warn().
-			Str(constants.LogItemType, itemType).
-			Msgf("Cannot find dofusDude ingredientType match, returning amqp.IngredientType_ANY_INGREDIENT")
-		return amqp.IngredientType_ANY_INGREDIENT
-	}
-
-	return amqpIngredientType
 }
 
 func (service *Impl) SearchAnyItems(ctx context.Context, query,

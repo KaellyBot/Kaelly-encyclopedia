@@ -78,7 +78,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 	}
 
 	return &amqp.EncyclopediaItemAnswer{
-		Type: amqp.ItemType_SET,
+		Type: amqp.ItemType_SET_TYPE,
 		Set: &amqp.EncyclopediaItemAnswer_Set{
 			Id:         fmt.Sprintf("%v", set.GetAnkamaId()),
 			Name:       set.GetName(),

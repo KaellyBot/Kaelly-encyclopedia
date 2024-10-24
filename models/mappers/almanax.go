@@ -7,11 +7,13 @@ import (
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry) *amqp.Almanax {
+func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
+) *amqp.Almanax {
 	if dodugoAlmanax == nil {
 		return nil
 	}
@@ -29,12 +31,15 @@ func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry) *amqp.Almanax {
 		icon = *dodugoAlmanax.Tribute.Item.GetImageUrls().Sd.Get()
 	}
 
+	itemType := sourceService.GetItemType(dodugoAlmanax.Tribute.Item.GetSubtype())
+
 	return &amqp.Almanax{
 		Bonus: *dodugoAlmanax.Bonus.Description,
 		Tribute: &amqp.Almanax_Tribute{
 			Item: &amqp.Almanax_Tribute_Item{
 				Name: *dodugoAlmanax.Tribute.Item.Name,
 				Icon: icon,
+				Type: itemType,
 			},
 			Quantity: *dodugoAlmanax.Tribute.Quantity,
 		},
@@ -61,23 +66,25 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 }
 
 func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
-) *amqp.EncyclopediaAlmanaxResourceAnswer {
-	resources := make(map[string]int32, 0)
+	sourceService sources.Service) *amqp.EncyclopediaAlmanaxResourceAnswer {
+	quantityPerResource := make(map[string]int32, 0)
 	for _, almanax := range dodugoAlmanax {
 		itemName := *almanax.Tribute.GetItem().Name
-		quantity, found := resources[itemName]
+		quantity, found := quantityPerResource[itemName]
 		if !found {
 			quantity = 0
 		}
 
-		resources[itemName] = quantity + almanax.Tribute.GetQuantity()
+		quantityPerResource[itemName] = quantity + almanax.Tribute.GetQuantity()
 	}
 
 	tributes := make([]*amqp.EncyclopediaAlmanaxResourceAnswer_Tribute, 0)
-	for itemName, quantity := range resources {
+	for _, almanax := range dodugoAlmanax {
+		itemName := *almanax.Tribute.GetItem().Name
 		tributes = append(tributes, &amqp.EncyclopediaAlmanaxResourceAnswer_Tribute{
 			ItemName: itemName,
-			Quantity: quantity,
+			ItemType: sourceService.GetItemType(almanax.Tribute.Item.GetSubtype()),
+			Quantity: quantityPerResource[itemName],
 		})
 	}
 

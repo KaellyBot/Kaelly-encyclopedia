@@ -21,16 +21,14 @@ func New(scheduler gocron.Scheduler,
 		storeService:    storeService,
 		httpTimeout:     viper.GetDuration(constants.DofusDudeTimeout),
 		itemTypes: map[string]amqp.ItemType{
-			"items-cosmetics": amqp.ItemType_COSMETIC,
-			"items-equipment": amqp.ItemType_EQUIPMENT,
+			"consumables":     amqp.ItemType_CONSUMABLE_TYPE,
+			"equipment":       amqp.ItemType_EQUIPMENT_TYPE,
+			"items-cosmetics": amqp.ItemType_COSMETIC_TYPE,
+			"items-equipment": amqp.ItemType_EQUIPMENT_TYPE,
 			"mounts":          amqp.ItemType_MOUNT_TYPE,
-			"sets":            amqp.ItemType_SET,
-		},
-		ingredientTypes: map[string]amqp.IngredientType{
-			"consumables": amqp.IngredientType_CONSUMABLE,
-			"equipment":   amqp.IngredientType_EQUIPMENT_INGREDIENT,
-			"quest":       amqp.IngredientType_QUEST_ITEM,
-			"resources":   amqp.IngredientType_RESOURCE,
+			"quest":           amqp.ItemType_QUEST_ITEM_TYPE,
+			"resources":       amqp.ItemType_RESOURCE_TYPE,
+			"sets":            amqp.ItemType_SET_TYPE,
 		},
 	}
 
