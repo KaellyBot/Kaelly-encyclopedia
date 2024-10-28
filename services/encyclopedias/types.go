@@ -19,7 +19,9 @@ const (
 )
 
 var (
-	errBadRequestMessage = errors.New("message request could not be satisfied")
+	errBadRequestMessage    = errors.New("message request could not be satisfied")
+	errResponseRequestEmpty = errors.New("response request is empty")
+	errUnknownQuery         = errors.New("cannot determine query type")
 )
 
 type getListFunc func(ctx context.Context, query, correlationID,

@@ -8,7 +8,6 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
-	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
@@ -47,30 +46,19 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 	log.Info().Str(constants.LogCorrelationID, correlationID).
 		Msgf("Get almanax effect encyclopedia request received")
 
-	values, err := service.sourceService.SearchAlmanaxEffects(ctx, request.Query, lg)
-	if err != nil {
+	effect, errEffect := service.getEffectFromRequest(ctx, request, lg)
+	if errEffect != nil {
 		log.Error().Str(constants.LogCorrelationID, correlationID).
-			Err(err).
+			Err(errEffect).
 			Str(constants.LogQueryID, request.Query).
-			Msgf("Error while handling encyclopedia almanax effect" +
-				" and searching for almanax effect list, returning failed request")
+			Str(constants.LogDate, request.Date.String()).
+			Msgf("Error while handling encyclopedia almanax effect request" +
+				" and searching for accurate almanax effect, returning failed request")
 		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
 		return
 	}
 
-	if len(values) == 0 {
-		log.Error().Str(constants.LogCorrelationID, correlationID).
-			Err(sources.ErrNotFound).
-			Str(constants.LogQueryID, request.Query).
-			Msgf("Error while handling encyclopedia almanax effect" +
-				" and searching for almanax effect list, returning failed request")
-		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
-		return
-	}
-
-	// We trust the omnisearch by taking the first one in the list
 	now := time.Now().UTC()
-	effect := values[0]
 	dodugoAlmanaxes := make([]*dodugo.AlmanaxEntry, 0)
 	almanaxEntities := service.almanaxService.GetAlmanaxesByEffect(*effect.Id)
 	for _, almanaxEntity := range almanaxEntities {
@@ -119,6 +107,33 @@ func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.R
 
 	answer := mappers.MapAlmanaxResource(almanax, request.Duration, service.sourceService)
 	service.publishAlmanaxResourceAnswerSuccess(correlationID, answer, message.Language)
+}
+
+func (service *Impl) getEffectFromRequest(ctx context.Context, request *amqp.EncyclopediaAlmanaxEffectRequest,
+	lg string) (*dodugo.GetMetaAlmanaxBonuses200ResponseInner, error) {
+	switch request.Type {
+	case amqp.EncyclopediaAlmanaxEffectRequest_QUERY:
+		values, errSearch := service.sourceService.SearchAlmanaxEffects(ctx, request.Query, lg)
+		if errSearch != nil {
+			return nil, errSearch
+		}
+
+		if len(values) == 0 {
+			return nil, errResponseRequestEmpty
+		}
+
+		// We trust the omnisearch by taking the first one in the list
+		return &values[0], nil
+	case amqp.EncyclopediaAlmanaxEffectRequest_DATE:
+		dodugoAlmanax, errGet := service.sourceService.
+			GetAlmanaxByDate(ctx, request.GetDate().AsTime(), lg)
+		if errGet != nil {
+			return nil, errGet
+		}
+		return dodugoAlmanax.Bonus.Type, nil
+	default:
+		return nil, errUnknownQuery
+	}
 }
 
 func isValidAlmanaxRequest(request *amqp.EncyclopediaAlmanaxRequest) bool {
