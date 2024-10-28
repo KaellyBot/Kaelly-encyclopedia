@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/dofusdude/dodugo"
@@ -23,6 +24,11 @@ func MapAlmanaxes(dodugoAlmanaxes []*dodugo.AlmanaxEntry, sourceService sources.
 
 		almanaxes = append(almanaxes, almanax)
 	}
+
+	// Sorted by ASC
+	sort.Slice(almanaxes, func(i, j int) bool {
+		return almanaxes[i].Date.Seconds < almanaxes[j].Date.Seconds
+	})
 
 	return almanaxes
 }
