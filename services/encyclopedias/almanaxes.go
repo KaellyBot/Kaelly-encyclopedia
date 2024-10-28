@@ -93,8 +93,8 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 		dodugoAlmanaxes = append(dodugoAlmanaxes, dodugoAlmanax)
 	}
 
-	response := mappers.MapAlmanaxes(dodugoAlmanaxes, service.sourceService)
-	service.publishAlmanaxEffectAnswerSuccess(correlationID, response, message.Language)
+	almanaxes := mappers.MapAlmanaxes(dodugoAlmanaxes, service.sourceService)
+	service.publishAlmanaxEffectAnswerSuccess(correlationID, effect.GetName(), almanaxes, message.Language)
 }
 
 func (service *Impl) almanaxResourceRequest(ctx context.Context, message *amqp.RabbitMQMessage, correlationID string) {
@@ -178,13 +178,14 @@ func (service *Impl) publishAlmanaxEffectAnswerFailed(correlationID string, lang
 	}
 }
 
-func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID string, almanaxes []*amqp.Almanax,
+func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID, query string, almanaxes []*amqp.Almanax,
 	language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_ANSWER,
 		Status:   amqp.RabbitMQMessage_SUCCESS,
 		Language: language,
 		EncyclopediaAlmanaxEffectAnswer: &amqp.EncyclopediaAlmanaxEffectAnswer{
+			Query:     query,
 			Almanaxes: almanaxes,
 		},
 	}
