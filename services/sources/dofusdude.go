@@ -462,34 +462,6 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 	return dodugoAlmanax, nil
 }
 
-func (service *Impl) GetAlmanaxByEffect(ctx context.Context, effect, language string,
-) (*dodugo.AlmanaxEntry, error) {
-	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
-	defer cancel()
-
-	var dodugoAlmanax *dodugo.AlmanaxEntry
-	var dodugoAlmanaxOccurrences []dodugo.AlmanaxEntry
-	key := buildItemKey(almanax, effect, language, constants.GetEncyclopediasSource().Name)
-	if !service.getElementFromCache(ctx, key, &dodugoAlmanaxOccurrences) {
-		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
-			GetAlmanaxRange(ctx, language).
-			FilterBonusType(effect).
-			RangeSize(constants.DofusDudeAlmanaxSizeLimit).
-			Execute()
-		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
-			return nil, err
-		}
-		defer r.Body.Close()
-		service.putElementToCache(ctx, key, resp)
-	}
-
-	if len(dodugoAlmanaxOccurrences) > 0 {
-		dodugoAlmanax = &dodugoAlmanaxOccurrences[0]
-	}
-
-	return dodugoAlmanax, nil
-}
-
 func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string,
 ) ([]dodugo.AlmanaxEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)

@@ -2,7 +2,9 @@ package encyclopedias
 
 import (
 	"context"
+	"time"
 
+	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
@@ -67,18 +69,31 @@ func (service *Impl) almanaxEffectRequest(ctx context.Context, message *amqp.Rab
 	}
 
 	// We trust the omnisearch by taking the first one in the list
+	now := time.Now().UTC()
 	effect := values[0]
-	almanax, err := service.sourceService.GetAlmanaxByEffect(ctx, *effect.Id, lg)
-	if err != nil {
-		log.Error().Str(constants.LogCorrelationID, correlationID).
-			Err(err).
-			Str(constants.LogQueryID, request.Query).
-			Msgf("Error while handling encyclopedia almanax effect, returning failed request")
-		service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
-		return
+	dodugoAlmanaxes := make([]*dodugo.AlmanaxEntry, 0)
+	almanaxEntities := service.almanaxService.GetAlmanaxesByEffect(*effect.Id)
+	for _, almanaxEntity := range almanaxEntities {
+		year := now.Year()
+		if time.Month(almanaxEntity.Month) < now.Month() ||
+			time.Month(almanaxEntity.Month) == now.Month() && almanaxEntity.Day < now.Day() {
+			year++
+		}
+
+		date := time.Date(year, time.Month(almanaxEntity.Month), almanaxEntity.Day, 0, 0, 0, 0, time.UTC)
+		dodugoAlmanax, err := service.sourceService.GetAlmanaxByDate(ctx, date, lg)
+		if err != nil {
+			log.Error().Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogDate, date.String()).
+				Msgf("Error while handling encyclopedia almanax date, returning failed request")
+			service.publishAlmanaxEffectAnswerFailed(correlationID, message.Language)
+			return
+		}
+
+		dodugoAlmanaxes = append(dodugoAlmanaxes, dodugoAlmanax)
 	}
 
-	response := mappers.MapAlmanax(almanax, service.sourceService)
+	response := mappers.MapAlmanaxes(dodugoAlmanaxes, service.sourceService)
 	service.publishAlmanaxEffectAnswerSuccess(correlationID, response, message.Language)
 }
 
@@ -163,14 +178,14 @@ func (service *Impl) publishAlmanaxEffectAnswerFailed(correlationID string, lang
 	}
 }
 
-func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID string, almanax *amqp.Almanax,
+func (service *Impl) publishAlmanaxEffectAnswerSuccess(correlationID string, almanaxes []*amqp.Almanax,
 	language amqp.Language) {
 	message := amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_ANSWER,
 		Status:   amqp.RabbitMQMessage_SUCCESS,
 		Language: language,
 		EncyclopediaAlmanaxEffectAnswer: &amqp.EncyclopediaAlmanaxEffectAnswer{
-			Almanax: almanax,
+			Almanaxes: almanaxes,
 		},
 	}
 

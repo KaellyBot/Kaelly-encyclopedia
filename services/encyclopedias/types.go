@@ -6,6 +6,7 @@ import (
 
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
@@ -41,6 +42,7 @@ type Service interface {
 
 type Impl struct {
 	sourceService        sources.Service
+	almanaxService       almanaxes.Service
 	equipmentService     equipments.Service
 	setService           sets.Service
 	broker               amqp.MessageBroker

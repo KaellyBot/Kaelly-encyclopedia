@@ -6,8 +6,10 @@ import (
 	"github.com/go-co-op/gocron/v2"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	almanaxRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
 	equipmentRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/equipments"
 	setRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
+	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
@@ -20,15 +22,15 @@ import (
 
 func New() (*Impl, error) {
 	// misc
-	db, err := databases.New()
-	if err != nil {
-		log.Fatal().Err(err).Msgf("DB instantiation failed, shutting down.")
+	db, errDB := databases.New()
+	if errDB != nil {
+		log.Fatal().Err(errDB).Msgf("DB instantiation failed, shutting down.")
 	}
 
-	broker, err := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress),
+	broker, errBroker := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress),
 		[]amqp.Binding{encyclopedias.GetBinding()})
-	if err != nil {
-		return nil, err
+	if errBroker != nil {
+		return nil, errBroker
 	}
 
 	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(time.UTC))
@@ -37,28 +39,34 @@ func New() (*Impl, error) {
 	}
 
 	// Repositories
+	almanaxRepo := almanaxRepo.New(db)
 	equipmentRepo := equipmentRepo.New(db)
 	setRepo := setRepo.New(db)
 
 	// services
 	storeService := stores.New()
-	equipmentService, err := equipments.New(equipmentRepo)
-	if err != nil {
-		return nil, err
+	almanaxService, errAlmanax := almanaxes.New(almanaxRepo)
+	if errAlmanax != nil {
+		return nil, errAlmanax
 	}
 
-	sourceService, err := sources.New(scheduler, storeService)
-	if err != nil {
-		return nil, err
+	equipmentService, errEquipment := equipments.New(equipmentRepo)
+	if errEquipment != nil {
+		return nil, errEquipment
 	}
 
-	setService, err := sets.New(setRepo, sourceService, equipmentService)
-	if err != nil {
-		return nil, err
+	sourceService, errSource := sources.New(scheduler, storeService)
+	if errSource != nil {
+		return nil, errSource
+	}
+
+	setService, errSet := sets.New(setRepo, sourceService, equipmentService)
+	if errSet != nil {
+		return nil, errSet
 	}
 
 	encyclopediaService := encyclopedias.New(broker, sourceService,
-		equipmentService, setService)
+		almanaxService, equipmentService, setService)
 
 	return &Impl{
 		db:                  db,

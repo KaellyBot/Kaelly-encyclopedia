@@ -12,6 +12,21 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+func MapAlmanaxes(dodugoAlmanaxes []*dodugo.AlmanaxEntry, sourceService sources.Service,
+) []*amqp.Almanax {
+	almanaxes := make([]*amqp.Almanax, 0)
+	for _, dodugoAlmanax := range dodugoAlmanaxes {
+		almanax := MapAlmanax(dodugoAlmanax, sourceService)
+		if almanax == nil {
+			return nil
+		}
+
+		almanaxes = append(almanaxes, almanax)
+	}
+
+	return almanaxes
+}
+
 func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
 ) *amqp.Almanax {
 	if dodugoAlmanax == nil {

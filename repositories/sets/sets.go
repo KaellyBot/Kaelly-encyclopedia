@@ -11,7 +11,9 @@ func New(db databases.MySQLConnection) *Impl {
 
 func (repo *Impl) GetSets() ([]entities.Set, error) {
 	var sets []entities.Set
-	response := repo.db.GetDB().Model(&entities.Set{}).Find(&sets)
+	response := repo.db.GetDB().
+		Model(&entities.Set{}).
+		Find(&sets)
 	return sets, response.Error
 }
 

@@ -5,6 +5,7 @@ import (
 
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
@@ -12,9 +13,11 @@ import (
 )
 
 func New(broker amqp.MessageBroker, sourceService sources.Service,
-	equipmentService equipments.Service, setService sets.Service) *Impl {
+	almanaxService almanaxes.Service, equipmentService equipments.Service,
+	setService sets.Service) *Impl {
 	service := Impl{
 		sourceService:    sourceService,
+		almanaxService:   almanaxService,
 		equipmentService: equipmentService,
 		setService:       setService,
 		broker:           broker,

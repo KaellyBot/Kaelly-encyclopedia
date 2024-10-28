@@ -51,7 +51,6 @@ type Service interface {
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)
 
 	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.AlmanaxEntry, error)
-	GetAlmanaxByEffect(ctx context.Context, effect, language string) (*dodugo.AlmanaxEntry, error)
 	GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string) ([]dodugo.AlmanaxEntry, error)
 
 	ListenGameEvent(handler GameEventHandler)
