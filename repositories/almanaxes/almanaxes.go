@@ -16,3 +16,7 @@ func (repo *Impl) GetAlmanaxes() ([]entities.Almanax, error) {
 		Find(&almanaxes)
 	return almanaxes, response.Error
 }
+
+func (repo *Impl) Save(almanax entities.Almanax) error {
+	return repo.db.GetDB().Save(&almanax).Error
+}

@@ -45,11 +45,6 @@ func New() (*Impl, error) {
 
 	// services
 	storeService := stores.New()
-	almanaxService, errAlmanax := almanaxes.New(almanaxRepo)
-	if errAlmanax != nil {
-		return nil, errAlmanax
-	}
-
 	equipmentService, errEquipment := equipments.New(equipmentRepo)
 	if errEquipment != nil {
 		return nil, errEquipment
@@ -58,6 +53,11 @@ func New() (*Impl, error) {
 	sourceService, errSource := sources.New(scheduler, storeService)
 	if errSource != nil {
 		return nil, errSource
+	}
+
+	almanaxService, errAlmanax := almanaxes.New(almanaxRepo, sourceService)
+	if errAlmanax != nil {
+		return nil, errAlmanax
 	}
 
 	setService, errSet := sets.New(setRepo, sourceService, equipmentService)

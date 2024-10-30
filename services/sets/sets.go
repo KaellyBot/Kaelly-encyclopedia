@@ -61,7 +61,7 @@ func (service *Impl) buildMissingSets() {
 
 	sets, errGet := service.sourceService.GetSets(ctx)
 	if errGet != nil {
-		log.Error().Err(errGet).Msgf("Cannot retrieve sets, trying later...")
+		log.Error().Err(errGet).Msgf("Cannot retrieve sets from DofusDude, trying later...")
 		return
 	}
 
@@ -94,7 +94,7 @@ func (service *Impl) buildMissingSets() {
 		Msg("Set icons built!")
 
 	errLoad := service.loadSetFromDB()
-	log.Warn().Err(errLoad).Msg("Could not reload set icons, please restart to take them in account")
+	log.Warn().Err(errLoad).Msg("Could not reload set from DB, please restart to take them in account")
 }
 
 func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry,

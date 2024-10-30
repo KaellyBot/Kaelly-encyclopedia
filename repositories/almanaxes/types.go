@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	GetAlmanaxes() ([]entities.Almanax, error)
+	Save(almanax entities.Almanax) error
 }
 
 type Impl struct {
