@@ -1,6 +1,9 @@
 package almanaxes
 
 import (
+	"sort"
+	"time"
+
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
@@ -21,8 +24,31 @@ func New(repository repository.Repository) (*Impl, error) {
 	return &service, nil
 }
 
-func (service *Impl) GetAlmanaxesByEffect(dofusDudeEffectID string) []entities.Almanax {
-	return service.almanaxes[dofusDudeEffectID]
+func (service *Impl) GetDatesByAlmanaxEffect(dofusDudeEffectID string) []time.Time {
+	now := time.Now().UTC()
+	dates := make([]time.Time, 0)
+	entities, found := service.almanaxes[dofusDudeEffectID]
+	if !found {
+		return dates
+	}
+
+	for _, entity := range entities {
+		year := now.Year()
+		if time.Month(entity.Month) < now.Month() ||
+			time.Month(entity.Month) == now.Month() && entity.Day < now.Day() {
+			year++
+		}
+
+		date := time.Date(year, time.Month(entity.Month), entity.Day, 0, 0, 0, 0, time.UTC)
+		dates = append(dates, date)
+	}
+
+	// Sorted by ASC
+	sort.Slice(dates, func(i, j int) bool {
+		return dates[i].Before(dates[j])
+	})
+
+	return dates
 }
 
 func (service *Impl) loadAlmanaxEffectsFromDB() error {

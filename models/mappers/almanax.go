@@ -2,7 +2,6 @@ package mappers
 
 import (
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/dofusdude/dodugo"
@@ -13,8 +12,9 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func MapAlmanaxes(dodugoAlmanaxes []*dodugo.AlmanaxEntry, sourceService sources.Service,
-) []*amqp.Almanax {
+func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectName string,
+	dodugoAlmanaxes []*dodugo.AlmanaxEntry, total int, sourceService sources.Service,
+) *amqp.EncyclopediaAlmanaxEffectAnswer {
 	almanaxes := make([]*amqp.Almanax, 0)
 	for _, dodugoAlmanax := range dodugoAlmanaxes {
 		almanax := MapAlmanax(dodugoAlmanax, sourceService)
@@ -25,12 +25,20 @@ func MapAlmanaxes(dodugoAlmanaxes []*dodugo.AlmanaxEntry, sourceService sources.
 		almanaxes = append(almanaxes, almanax)
 	}
 
-	// Sorted by ASC
-	sort.Slice(almanaxes, func(i, j int) bool {
-		return almanaxes[i].Date.Seconds < almanaxes[j].Date.Seconds
-	})
+	page := request.GetOffset() / request.GetSize()
+	pages := int32(total) / request.GetSize()
+	if int32(total)%request.GetSize() != 0 {
+		pages++
+	}
 
-	return almanaxes
+	return &amqp.EncyclopediaAlmanaxEffectAnswer{
+		Query:     effectName,
+		Almanaxes: almanaxes,
+		Page:      page,
+		Pages:     pages,
+		Total:     int32(total),
+		Source:    constants.GetDofusDudeSource(),
+	}
 }
 
 func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
@@ -66,7 +74,6 @@ func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Servic
 		},
 		Reward: int64(dodugoAlmanax.GetRewardKamas()),
 		Date:   timestamppb.New(date.UTC()),
-		Source: constants.GetDofusDudeSource(),
 	}
 }
 
