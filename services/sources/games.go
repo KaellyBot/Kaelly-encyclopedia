@@ -50,7 +50,7 @@ func (service *Impl) checkGameVersion() {
 
 	log.Info().Msgf("%v version goes from '%v' to '%v'", game, gameVersion, latestGameVersion)
 	for _, handler := range service.eventHandlers {
-		emitGameEvent(handler)
+		go emitGameEvent(handler)
 	}
 }
 
