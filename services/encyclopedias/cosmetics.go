@@ -15,7 +15,7 @@ func (service *Impl) getCosmeticByID(ctx context.Context, id int32, correlationI
 	}
 
 	ingredients := service.getIngredients(ctx, cosmetic.GetRecipe(), correlationID, lg)
-	return mappers.MapEquipment(cosmetic, ingredients), nil
+	return mappers.MapEquipment(cosmetic, ingredients, service.equipmentService), nil
 }
 
 func (service *Impl) getCosmeticByQuery(ctx context.Context, query, correlationID,
@@ -26,5 +26,5 @@ func (service *Impl) getCosmeticByQuery(ctx context.Context, query, correlationI
 	}
 
 	ingredients := service.getIngredients(ctx, cosmetic.GetRecipe(), correlationID, lg)
-	return mappers.MapEquipment(cosmetic, ingredients), nil
+	return mappers.MapEquipment(cosmetic, ingredients, service.equipmentService), nil
 }

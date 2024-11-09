@@ -46,12 +46,12 @@ func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
 		}
 
 		index := 0
-		if equipType.ID == amqp.EquipmentType_RING {
+		if equipType.EquipmentID == amqp.EquipmentType_RING {
 			index += ringNumber
 			ringNumber++
 		}
 
-		points, pointFound := constants.GetSetPoints()[equipType.ID]
+		points, pointFound := constants.GetSetPoints()[equipType.EquipmentID]
 		if !pointFound {
 			return nil, fmt.Errorf("item %v type have not equivalent point: %v",
 				item.GetAnkamaId(), *item.GetType().Id)

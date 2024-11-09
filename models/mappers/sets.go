@@ -48,7 +48,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			Id:    formattedItemIDString,
 			Name:  item.GetName(),
 			Level: int64(item.GetLevel()),
-			Type:  mapItemType(item.GetType(), equipmentService),
+			Type:  mapEquipmentType(item.GetType(), equipmentService).EquipmentID,
 		})
 	}
 
@@ -59,9 +59,8 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 		for _, effect := range bonus {
 			itemNumber = effect.GetItemCombination()
 			effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
-				Id:       fmt.Sprintf("%v", *effect.GetType().Id),
-				Label:    effect.GetFormatted(),
-				IsActive: *effect.GetType().IsActive,
+				Id:    fmt.Sprintf("%v", *effect.GetType().Id),
+				Label: effect.GetFormatted(),
 			})
 		}
 

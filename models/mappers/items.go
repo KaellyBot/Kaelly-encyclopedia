@@ -5,6 +5,7 @@ import (
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 )
 
@@ -23,11 +24,15 @@ func MapItemList(dodugoItems []dodugo.GetGameSearch200ResponseInner) *amqp.Encyc
 	}
 }
 
-func mapItemType(itemType dodugo.ItemsListEntryTypedType,
-	equipmentService equipments.Service) amqp.EquipmentType {
+func mapEquipmentType(itemType dodugo.ItemsListEntryTypedType,
+	equipmentService equipments.Service) entities.EquipmentType {
 	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetId())
 	if !found {
-		return amqp.EquipmentType_NONE
+		return entities.EquipmentType{
+			EquipmentID: amqp.EquipmentType_NONE,
+			ItemID:      amqp.ItemType_ANY_ITEM_TYPE,
+			DofusDudeID: itemType.GetId(),
+		}
 	}
-	return equipmentType.ID
+	return equipmentType
 }

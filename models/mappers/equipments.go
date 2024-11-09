@@ -6,27 +6,34 @@ import (
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 	"github.com/rs/zerolog/log"
 )
 
 func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingredient,
-) *amqp.EncyclopediaItemAnswer {
-	var set *amqp.EncyclopediaItemAnswer_Equipment_Set
+	equipmentService equipments.Service) *amqp.EncyclopediaItemAnswer {
+	var set *amqp.EncyclopediaItemAnswer_Equipment_SetFamily
 	if item.HasParentSet() {
 		parentSet := item.GetParentSet()
-		set = &amqp.EncyclopediaItemAnswer_Equipment_Set{
+		set = &amqp.EncyclopediaItemAnswer_Equipment_SetFamily{
 			Id:   fmt.Sprintf("%v", parentSet.GetId()),
 			Name: parentSet.GetName(),
 		}
 	}
 
+	weaponEffects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
 	effects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
 	for _, effect := range item.GetEffects() {
-		effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
-			Id:       fmt.Sprintf("%v", *effect.GetType().Id),
-			Label:    effect.GetFormatted(),
-			IsActive: *effect.GetType().IsActive,
-		})
+		amqpEffect := &amqp.EncyclopediaItemAnswer_Effect{
+			Id:    fmt.Sprintf("%v", *effect.GetType().Id),
+			Label: effect.GetFormatted(),
+		}
+
+		if effect.GetType().IsActive != nil && *effect.GetType().IsActive {
+			weaponEffects = append(weaponEffects, amqpEffect)
+		} else {
+			effects = append(effects, amqpEffect)
+		}
 	}
 
 	var recipe *amqp.EncyclopediaItemAnswer_Recipe
@@ -63,6 +70,21 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 		icon = item.GetImageUrls().Hq.Get()
 	}
 
+	equipmentType := mapEquipmentType(item.GetType(), equipmentService)
+
+	var characteristics *amqp.EncyclopediaItemAnswer_Equipment_Characteristics
+	if item.GetIsWeapon() {
+		characteristics = &amqp.EncyclopediaItemAnswer_Equipment_Characteristics{
+			Cost:           int64(item.GetApCost()),
+			MinRange:       int64(item.Range.GetMin()),
+			MaxRange:       int64(item.Range.GetMax()),
+			MaxCastPerTurn: int64(item.GetMaxCastPerTurn()),
+			CriticalRate:   int64(item.GetCriticalHitProbability()),
+			CriticalBonus:  int64(item.GetCriticalHitBonus()),
+			// TODO area
+		}
+	}
+
 	// TODO condition
 
 	return &amqp.EncyclopediaItemAnswer{
@@ -71,13 +93,19 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Id:          fmt.Sprintf("%v", item.GetAnkamaId()),
 			Name:        item.GetName(),
 			Description: item.GetDescription(),
-			LabelType:   *item.GetType().Name,
-			Icon:        *icon,
-			Level:       int64(item.GetLevel()),
-			Pods:        int64(item.GetPods()),
-			Set:         set,
-			Effects:     effects,
-			Recipe:      recipe,
+			Type: &amqp.EncyclopediaItemAnswer_Equipment_Type{
+				ItemType:       equipmentType.ItemID,
+				EquipmentType:  equipmentType.EquipmentID,
+				EquipmentLabel: *item.GetType().Name,
+			},
+			Icon:            *icon,
+			Level:           int64(item.GetLevel()),
+			Pods:            int64(item.GetPods()),
+			Set:             set,
+			Characteristics: characteristics,
+			WeaponEffects:   weaponEffects,
+			Effects:         effects,
+			Recipe:          recipe,
 		},
 		Source: constants.GetDofusDudeSource(),
 	}
