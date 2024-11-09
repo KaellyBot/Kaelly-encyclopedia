@@ -37,6 +37,7 @@ func GetSupportedTypeEnums() []string {
 		"pet",
 		"petsmount",
 		"mount",
+		"tool",
 
 		// Cosmetics
 		"ceremonial-cape",
