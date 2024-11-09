@@ -85,7 +85,11 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 		}
 	}
 
-	// TODO condition
+	conditions := make([]string, 0)
+	for _, condition := range item.GetConditions() {
+		conditions = append(conditions, fmt.Sprintf("%v %v %v",
+			condition.Element.GetName(), condition.GetOperator(), condition.GetIntValue()))
+	}
 
 	return &amqp.EncyclopediaItemAnswer{
 		Type: amqp.ItemType_EQUIPMENT_TYPE,
@@ -105,6 +109,7 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Characteristics: characteristics,
 			WeaponEffects:   weaponEffects,
 			Effects:         effects,
+			Conditions:      conditions,
 			Recipe:          recipe,
 		},
 		Source: constants.GetDofusDudeSource(),
