@@ -11,27 +11,28 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) itemRequest(ctx context.Context,
-	message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) itemRequest(ctx amqp.Context, message *amqp.RabbitMQMessage) {
 	request := message.EncyclopediaItemRequest
 	lg := mappers.MapLanguage(message.Language)
 	if !isValidItemRequest(request) {
-		service.publishItemAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
+			message.Language)
 		return
 	}
 
-	log.Info().Str(constants.LogCorrelationID, correlationID).
+	log.Info().Str(constants.LogCorrelationID, ctx.CorrelationID).
 		Str(constants.LogQueryID, request.Query).
 		Str(constants.LogQueryType, request.GetType().String()).
 		Msgf("Encyclopedia Item Request received")
 
 	funcs, found := service.getItemByFuncs[request.Type]
 	if !found {
-		log.Error().Str(constants.LogCorrelationID, correlationID).
+		log.Error().Str(constants.LogCorrelationID, ctx.CorrelationID).
 			Str(constants.LogQueryID, request.Query).
 			Str(constants.LogQueryType, request.GetType().String()).
 			Msgf("Error while handling encyclopedia item query type, returning failed request")
-		service.publishItemAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
+			message.Language)
 		return
 	}
 
@@ -41,30 +42,33 @@ func (service *Impl) itemRequest(ctx context.Context,
 		ankamaID, errID := strconv.ParseInt(request.Query, 10, 32)
 		if errID != nil {
 			log.Error().Err(errID).
-				Str(constants.LogCorrelationID, correlationID).
+				Str(constants.LogCorrelationID, ctx.CorrelationID).
 				Str(constants.LogQueryID, request.Query).
 				Str(constants.LogQueryType, request.GetType().String()).
 				Msgf("Error while converting query as ankamaID, returning failed request")
-			service.publishItemAnswerFailed(correlationID, message.Language)
+			service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
+				message.Language)
 			return
 		}
 
-		reply, err = funcs.GetItemByID(ctx, int32(ankamaID), correlationID, lg)
+		reply, err = funcs.GetItemByID(ctx, int32(ankamaID), ctx.CorrelationID, lg)
 	} else {
-		reply, err = funcs.GetItemByQuery(ctx, request.Query, correlationID, lg)
+		reply, err = funcs.GetItemByQuery(ctx, request.Query, ctx.CorrelationID, lg)
 	}
 
 	if err != nil {
 		log.Error().Err(err).
-			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogCorrelationID, ctx.CorrelationID).
 			Str(constants.LogQueryID, request.Query).
 			Str(constants.LogQueryType, request.GetType().String()).
 			Msgf("Error while retrieving encyclopedia item, returning failed request")
-		service.publishItemAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
+			message.Language)
 		return
 	}
 
-	service.publishItemAnswerSuccess(reply, correlationID, message.Language)
+	response := mappers.MapItem(reply, message.Language)
+	service.replyWithSuceededAnswer(ctx, response)
 }
 
 func (service *Impl) getItemByID(_ context.Context, _ int32, _,
@@ -97,36 +101,6 @@ func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 	}
 
 	return resp, nil
-}
-
-func (service *Impl) publishItemAnswerFailed(correlationID string, language amqp.Language) {
-	message := amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
-		Status:   amqp.RabbitMQMessage_FAILED,
-		Language: language,
-	}
-
-	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
-	if err != nil {
-		log.Error().Err(err).Str(constants.LogCorrelationID, correlationID).
-			Msgf("Cannot publish via broker, request ignored")
-	}
-}
-
-func (service *Impl) publishItemAnswerSuccess(answer *amqp.EncyclopediaItemAnswer,
-	correlationID string, language amqp.Language) {
-	message := amqp.RabbitMQMessage{
-		Type:                   amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
-		Status:                 amqp.RabbitMQMessage_SUCCESS,
-		Language:               language,
-		EncyclopediaItemAnswer: answer,
-	}
-
-	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
-	if err != nil {
-		log.Error().Err(err).Str(constants.LogCorrelationID, correlationID).
-			Msgf("Cannot publish via broker, request ignored")
-	}
 }
 
 func isValidItemRequest(request *amqp.EncyclopediaItemRequest) bool {

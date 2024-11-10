@@ -13,6 +13,7 @@ const (
 	LogKey           = "key"
 	LogQueryID       = "queryID"
 	LogQueryType     = "queryType"
+	LogReplyTo       = "replyTo"
 
 	LogLevelFallback = zerolog.InfoLevel
 )

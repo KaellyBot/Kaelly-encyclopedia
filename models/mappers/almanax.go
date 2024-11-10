@@ -14,10 +14,10 @@ import (
 
 func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectName string,
 	dodugoAlmanaxes []*dodugo.AlmanaxEntry, total int, sourceService sources.Service,
-) *amqp.EncyclopediaAlmanaxEffectAnswer {
+	language amqp.Language) *amqp.RabbitMQMessage {
 	almanaxes := make([]*amqp.Almanax, 0)
 	for _, dodugoAlmanax := range dodugoAlmanaxes {
-		almanax := MapAlmanax(dodugoAlmanax, sourceService)
+		almanax := mapAlmanax(dodugoAlmanax, sourceService)
 		if almanax == nil {
 			return nil
 		}
@@ -31,17 +31,35 @@ func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectNam
 		pages++
 	}
 
-	return &amqp.EncyclopediaAlmanaxEffectAnswer{
-		Query:     effectName,
-		Almanaxes: almanaxes,
-		Page:      page,
-		Pages:     pages,
-		Total:     int32(total),
-		Source:    constants.GetDofusDudeSource(),
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_ANSWER,
+		Status:   amqp.RabbitMQMessage_SUCCESS,
+		Language: language,
+		EncyclopediaAlmanaxEffectAnswer: &amqp.EncyclopediaAlmanaxEffectAnswer{
+			Query:     effectName,
+			Almanaxes: almanaxes,
+			Page:      page,
+			Pages:     pages,
+			Total:     int32(total),
+			Source:    constants.GetDofusDudeSource(),
+		},
 	}
 }
 
 func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
+	language amqp.Language) *amqp.RabbitMQMessage {
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_ANSWER,
+		Status:   amqp.RabbitMQMessage_SUCCESS,
+		Language: language,
+		EncyclopediaAlmanaxAnswer: &amqp.EncyclopediaAlmanaxAnswer{
+			Almanax: mapAlmanax(dodugoAlmanax, sourceService),
+			Source:  constants.GetDofusDudeSource(),
+		},
+	}
+}
+
+func mapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
 ) *amqp.Almanax {
 	if dodugoAlmanax == nil {
 		return nil
@@ -94,7 +112,7 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 }
 
 func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
-	sourceService sources.Service) *amqp.EncyclopediaAlmanaxResourceAnswer {
+	sourceService sources.Service, language amqp.Language) *amqp.RabbitMQMessage {
 	quantityPerResource := make(map[string]int32, 0)
 	for _, almanax := range dodugoAlmanax {
 		itemName := *almanax.Tribute.GetItem().Name
@@ -116,9 +134,14 @@ func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
 		})
 	}
 
-	return &amqp.EncyclopediaAlmanaxResourceAnswer{
-		Tributes: tributes,
-		Duration: dayDuration,
-		Source:   constants.GetDofusDudeSource(),
+	return &amqp.RabbitMQMessage{
+		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_ANSWER,
+		Status:   amqp.RabbitMQMessage_SUCCESS,
+		Language: language,
+		EncyclopediaAlmanaxResourceAnswer: &amqp.EncyclopediaAlmanaxResourceAnswer{
+			Tributes: tributes,
+			Duration: dayDuration,
+			Source:   constants.GetDofusDudeSource(),
+		},
 	}
 }

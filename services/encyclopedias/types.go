@@ -15,7 +15,6 @@ import (
 const (
 	requestQueueName   = "encyclopedias-requests"
 	requestsRoutingkey = "requests.encyclopedias"
-	answersRoutingkey  = "answers.encyclopedias"
 )
 
 var (

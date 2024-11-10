@@ -9,42 +9,45 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) listRequest(ctx context.Context,
-	message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) listRequest(ctx amqp.Context, message *amqp.RabbitMQMessage) {
 	request := message.EncyclopediaListRequest
 	if !isValidListRequest(request) {
-		service.publishListAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
+			message.Language)
 		return
 	}
 
-	log.Info().Str(constants.LogCorrelationID, correlationID).
+	log.Info().Str(constants.LogCorrelationID, ctx.CorrelationID).
 		Str(constants.LogQueryID, request.Query).
 		Str(constants.LogQueryType, request.GetType().String()).
 		Msgf("Encyclopedia List Request received")
 
 	getListFunc, found := service.getListByFunc[request.Type]
 	if !found {
-		log.Error().Str(constants.LogCorrelationID, correlationID).
+		log.Error().Str(constants.LogCorrelationID, ctx.CorrelationID).
 			Str(constants.LogQueryID, request.Query).
 			Str(constants.LogQueryType, request.GetType().String()).
 			Msgf("Error while handling encyclopedia list query type, returning failed request")
-		service.publishListAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
+			message.Language)
 		return
 	}
 
-	reply, err := getListFunc(ctx, request.Query, correlationID,
+	list, err := getListFunc(ctx, request.Query, ctx.CorrelationID,
 		mappers.MapLanguage(message.Language))
 	if err != nil {
 		log.Error().Err(err).
-			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogCorrelationID, ctx.CorrelationID).
 			Str(constants.LogQueryID, request.Query).
 			Str(constants.LogQueryType, request.GetType().String()).
 			Msgf("Error while retrieving encyclopedia list, returning failed request")
-		service.publishListAnswerFailed(correlationID, message.Language)
+		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
+			message.Language)
 		return
 	}
 
-	service.publishListAnswerSuccess(reply, correlationID, message.Language)
+	response := mappers.MapList(list, message.Language)
+	service.replyWithSuceededAnswer(ctx, response)
 }
 
 func (service *Impl) getItemList(ctx context.Context, query, _,
@@ -75,36 +78,6 @@ func (service *Impl) getAlmanaxEffectList(ctx context.Context, query, _,
 	}
 
 	return mappers.MapAlmanaxEffectList(dodugoAlmanaxEffects), nil
-}
-
-func (service *Impl) publishListAnswerFailed(correlationID string, language amqp.Language) {
-	message := amqp.RabbitMQMessage{
-		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
-		Status:   amqp.RabbitMQMessage_FAILED,
-		Language: language,
-	}
-
-	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
-	if err != nil {
-		log.Error().Err(err).Str(constants.LogCorrelationID, correlationID).
-			Msgf("Cannot publish via broker, request ignored")
-	}
-}
-
-func (service *Impl) publishListAnswerSuccess(answer *amqp.EncyclopediaListAnswer,
-	correlationID string, language amqp.Language) {
-	message := amqp.RabbitMQMessage{
-		Type:                   amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_ANSWER,
-		Status:                 amqp.RabbitMQMessage_SUCCESS,
-		Language:               language,
-		EncyclopediaListAnswer: answer,
-	}
-
-	err := service.broker.Publish(&message, amqp.ExchangeAnswer, answersRoutingkey, correlationID)
-	if err != nil {
-		log.Error().Err(err).Str(constants.LogCorrelationID, correlationID).
-			Msgf("Cannot publish via broker, request ignored")
-	}
 }
 
 func isValidListRequest(request *amqp.EncyclopediaListRequest) bool {

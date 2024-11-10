@@ -24,6 +24,15 @@ func MapItemList(dodugoItems []dodugo.GetGameSearch200ResponseInner) *amqp.Encyc
 	}
 }
 
+func MapItem(item *amqp.EncyclopediaItemAnswer, language amqp.Language) *amqp.RabbitMQMessage {
+	return &amqp.RabbitMQMessage{
+		Type:                   amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_ANSWER,
+		Status:                 amqp.RabbitMQMessage_SUCCESS,
+		Language:               language,
+		EncyclopediaItemAnswer: item,
+	}
+}
+
 func mapEquipmentType(itemType dodugo.ItemsListEntryTypedType,
 	equipmentService equipments.Service) entities.EquipmentType {
 	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetId())

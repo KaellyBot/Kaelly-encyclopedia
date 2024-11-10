@@ -1,8 +1,6 @@
 package encyclopedias
 
 import (
-	"context"
-
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
@@ -79,23 +77,49 @@ func (service *Impl) Consume() error {
 	return service.broker.Consume(requestQueueName, service.consume)
 }
 
-func (service *Impl) consume(ctx context.Context,
-	message *amqp.RabbitMQMessage, correlationID string) {
+func (service *Impl) consume(ctx amqp.Context, message *amqp.RabbitMQMessage) {
 	//exhaustive:ignore Don't need to be exhaustive here since they will be handled by default case
 	switch message.Type {
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_REQUEST:
-		service.almanaxRequest(ctx, message, correlationID)
+		service.almanaxRequest(ctx, message)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_REQUEST:
-		service.almanaxResourceRequest(ctx, message, correlationID)
+		service.almanaxResourceRequest(ctx, message)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_EFFECT_REQUEST:
-		service.almanaxEffectRequest(ctx, message, correlationID)
+		service.almanaxEffectRequest(ctx, message)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_LIST_REQUEST:
-		service.listRequest(ctx, message, correlationID)
+		service.listRequest(ctx, message)
 	case amqp.RabbitMQMessage_ENCYCLOPEDIA_ITEM_REQUEST:
-		service.itemRequest(ctx, message, correlationID)
+		service.itemRequest(ctx, message)
 	default:
 		log.Warn().
-			Str(constants.LogCorrelationID, correlationID).
+			Str(constants.LogCorrelationID, ctx.CorrelationID).
 			Msgf("Type not recognized, request ignored")
+	}
+}
+
+func (service *Impl) replyWithSuceededAnswer(ctx amqp.Context, message *amqp.RabbitMQMessage) {
+	err := service.broker.Reply(message, ctx.CorrelationID, ctx.ReplyTo)
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogCorrelationID, ctx.CorrelationID).
+			Str(constants.LogReplyTo, ctx.ReplyTo).
+			Msgf("Cannot publish via broker, request ignored")
+	}
+}
+
+func (service *Impl) replyWithFailedAnswer(ctx amqp.Context, messageType amqp.RabbitMQMessage_Type,
+	language amqp.Language) {
+	message := amqp.RabbitMQMessage{
+		Type:     messageType,
+		Status:   amqp.RabbitMQMessage_FAILED,
+		Language: language,
+	}
+
+	err := service.broker.Reply(&message, ctx.CorrelationID, ctx.ReplyTo)
+	if err != nil {
+		log.Error().Err(err).
+			Str(constants.LogCorrelationID, ctx.CorrelationID).
+			Str(constants.LogReplyTo, ctx.ReplyTo).
+			Msgf("Cannot publish via broker, request ignored")
 	}
 }
