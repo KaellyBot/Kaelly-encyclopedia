@@ -27,11 +27,7 @@ func New() (*Impl, error) {
 		log.Fatal().Err(errDB).Msgf("DB instantiation failed, shutting down.")
 	}
 
-	broker, errBroker := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress),
-		[]amqp.Binding{encyclopedias.GetBinding()})
-	if errBroker != nil {
-		return nil, errBroker
-	}
+	broker := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress))
 
 	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(time.UTC))
 	if errScheduler != nil {
@@ -77,6 +73,11 @@ func New() (*Impl, error) {
 }
 
 func (app *Impl) Run() error {
+	errBroker := app.broker.Run([]amqp.Binding{encyclopedias.GetBinding()})
+	if errBroker != nil {
+		return errBroker
+	}
+
 	app.scheduler.Start()
 	for _, job := range app.scheduler.Jobs() {
 		scheduledTime, err := job.NextRun()
