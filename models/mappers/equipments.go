@@ -85,12 +85,6 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 		}
 	}
 
-	conditions := make([]string, 0)
-	for _, condition := range item.GetConditions() {
-		conditions = append(conditions, fmt.Sprintf("%v %v %v",
-			condition.Element.GetName(), condition.GetOperator(), condition.GetIntValue()))
-	}
-
 	return &amqp.EncyclopediaItemAnswer{
 		Type: amqp.ItemType_EQUIPMENT_TYPE,
 		Equipment: &amqp.EncyclopediaItemAnswer_Equipment{
@@ -109,9 +103,59 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Characteristics: characteristics,
 			WeaponEffects:   weaponEffects,
 			Effects:         effects,
-			Conditions:      conditions,
+			Conditions:      mapConditions(item.ConditionTree),
 			Recipe:          recipe,
 		},
 		Source: constants.GetDofusDudeSource(),
 	}
+}
+
+func mapConditions(conditions *dodugo.ConditionTreeNode,
+) *amqp.EncyclopediaItemAnswer_Conditions {
+	if conditions == nil {
+		return nil
+	}
+
+	leaf := conditions.ConditionTreeLeaf
+	if leaf != nil {
+		return &amqp.EncyclopediaItemAnswer_Conditions{
+			Relation: amqp.EncyclopediaItemAnswer_Conditions_NONE,
+			Condition: &amqp.EncyclopediaItemAnswer_Conditions_Condition{
+				Operator: leaf.Condition.GetOperator(),
+				Value:    int64(leaf.Condition.GetIntValue()),
+				Element: &amqp.EncyclopediaItemAnswer_Conditions_Condition_Element{
+					Id:   fmt.Sprintf("%v", leaf.Condition.Element.GetId()),
+					Name: leaf.Condition.Element.GetName(),
+				},
+			},
+		}
+	}
+
+	innerConditions := conditions.ConditionTreeRelation
+	if innerConditions != nil {
+		var relation amqp.EncyclopediaItemAnswer_Conditions_Relation
+		switch innerConditions.GetRelation() {
+		case "or":
+			relation = amqp.EncyclopediaItemAnswer_Conditions_OR
+		case "and":
+			relation = amqp.EncyclopediaItemAnswer_Conditions_AND
+		default:
+			log.Warn().
+				Msgf("Cannot determine properly item condition relation '%v', using '%v' by default",
+					innerConditions.GetRelation(), amqp.EncyclopediaItemAnswer_Conditions_NONE)
+			relation = amqp.EncyclopediaItemAnswer_Conditions_NONE
+		}
+
+		children := make([]*amqp.EncyclopediaItemAnswer_Conditions, 0)
+		for _, node := range innerConditions.GetChildren() {
+			children = append(children, mapConditions(&node))
+		}
+
+		return &amqp.EncyclopediaItemAnswer_Conditions{
+			Relation: relation,
+			Children: children,
+		}
+	}
+
+	return nil
 }
