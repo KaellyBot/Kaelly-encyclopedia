@@ -33,8 +33,8 @@ const (
 	// Redis cache size, following LFU rules.
 	RedisCacheSize = "REDIS_CACHE_SIZE"
 
-	// Imgur API Client ID to upload images.
-	ImgurClientID = "IMGUR_CLIENT_ID"
+	// Cron tab to send almanax news.
+	AlmanaxCronTab = "ALMANAX_CRON_TAB"
 
 	// Cron tab to update set icons.
 	UpdateSetCronTab = "UPDATE_SET_CRON_TAB"
@@ -59,8 +59,8 @@ const (
 	defaultRedisAddress        = "localhost:6379"
 	defaultRedisCacheRetention = 60 * time.Minute
 	defaultRedisCacheSize      = 1000
-	defaultImgurClientID       = ""
-	defaultUpdateSetCronTab    = "0 0 0 * * *"
+	defaultAlmanaxCronTab      = "0 0 0 * * *"
+	defaultUpdateSetCronTab    = "0 2 0 * * *"
 	defaultDofusDudeTimeout    = 10 * time.Second
 	defaultMetricPort          = 2112
 	defaultLogLevel            = zerolog.InfoLevel
@@ -77,7 +77,7 @@ func GetDefaultConfigValues() map[string]any {
 		RedisAddress:        defaultRedisAddress,
 		RedisCacheRetention: defaultRedisCacheRetention,
 		RedisCacheSize:      defaultRedisCacheSize,
-		ImgurClientID:       defaultImgurClientID,
+		AlmanaxCronTab:      defaultAlmanaxCronTab,
 		UpdateSetCronTab:    defaultUpdateSetCronTab,
 		DofusDudeTimeout:    defaultDofusDudeTimeout,
 		MetricPort:          defaultMetricPort,

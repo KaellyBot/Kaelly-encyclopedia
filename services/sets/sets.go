@@ -9,13 +9,15 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
-func New(repository repository.Repository, sourceService sources.Service,
-	equipmentService equipments.Service) (*Impl, error) {
+func New(repository repository.Repository, newsService news.Service,
+	sourceService sources.Service, equipmentService equipments.Service) (*Impl, error) {
 	service := Impl{
+		newsService:      newsService,
 		sourceService:    sourceService,
 		equipmentService: equipmentService,
 		sets:             make(map[int32]entities.Set),
@@ -55,7 +57,7 @@ func (service *Impl) loadSetFromDB() error {
 	return nil
 }
 
-func (service *Impl) buildMissingSets() {
+func (service *Impl) buildMissingSets(_ string) {
 	log.Info().Msgf("Building missing set icons...")
 	ctx := context.Background()
 
@@ -95,6 +97,7 @@ func (service *Impl) buildMissingSets() {
 
 	errLoad := service.loadSetFromDB()
 	log.Warn().Err(errLoad).Msg("Could not reload set from DB, please restart to take them in account")
+	service.newsService.PublishSetNews(len(missingSets), len(missingSets)-errorCount)
 }
 
 func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry,
@@ -111,16 +114,16 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 		return errImg
 	}
 
-	// Upload image through imgur API
-	imageURL, errUpload := uploadImageToImgur(ctx, buf)
+	// Write image on dedicated volume
+	errUpload := writeOnDisk(ctx, buf)
 	if errUpload != nil {
 		return errUpload
 	}
 
-	// Store imgur link into database
+	// Store cdn link into database
 	errSave := service.repository.Save(entities.Set{
 		DofusDudeID: set.GetAnkamaId(),
-		Icon:        imageURL,
+		Icon:        fmt.Sprintf(setBaseURL, set.AnkamaId),
 	})
 	if errSave != nil {
 		return errSave

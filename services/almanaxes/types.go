@@ -6,6 +6,7 @@ import (
 
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
+	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
@@ -20,5 +21,6 @@ type Service interface {
 type Impl struct {
 	almanaxes     map[string][]entities.Almanax
 	sourceService sources.Service
+	newsService   news.Service
 	repository    repository.Repository
 }

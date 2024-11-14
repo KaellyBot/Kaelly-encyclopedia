@@ -7,7 +7,6 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
-	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,7 +26,7 @@ func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaListAnswer {
 }
 
 func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
-	equipmentService equipments.Service, setService sets.Service,
+	icon string, equipmentService equipments.Service,
 ) *amqp.EncyclopediaItemAnswer {
 	equipments := make([]*amqp.EncyclopediaItemAnswer_Set_Equipment, 0)
 	for _, itemID := range set.GetEquipmentIds() {
@@ -68,12 +67,6 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			ItemNumber: int64(itemNumber),
 			Effects:    effects,
 		})
-	}
-
-	var icon string
-	setDB, found := setService.GetSetByDofusDude(set.GetAnkamaId())
-	if found {
-		icon = setDB.Icon
 	}
 
 	return &amqp.EncyclopediaItemAnswer{

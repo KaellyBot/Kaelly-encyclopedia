@@ -9,7 +9,7 @@ require (
 	github.com/dofusdude/dodugo v0.9.4
 	github.com/go-co-op/gocron/v2 v2.12.1
 	github.com/go-redis/cache/v9 v9.0.0
-	github.com/kaellybot/kaelly-amqp v0.0.9-beta2
+	github.com/kaellybot/kaelly-amqp v0.0.9-beta4
 	github.com/prometheus/client_golang v1.20.4
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/rs/zerolog v1.33.0

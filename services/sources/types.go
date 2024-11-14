@@ -24,7 +24,7 @@ var (
 	ErrNotFound = errors.New("cannot find the desired resource")
 )
 
-type GameEventHandler func()
+type GameEventHandler func(gameVersion string)
 
 type Service interface {
 	GetItemType(itemType string) amqp.ItemType

@@ -6,18 +6,21 @@ import (
 	"sort"
 	"time"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
+	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
 )
 
-func New(repository repository.Repository,
-	sourceService sources.Service) (*Impl, error) {
+func New(scheduler gocron.Scheduler, repository repository.Repository,
+	sourceService sources.Service, newsService news.Service) (*Impl, error) {
 	service := Impl{
 		almanaxes:     make(map[string][]entities.Almanax),
 		sourceService: sourceService,
+		newsService:   newsService,
 		repository:    repository,
 	}
 
@@ -27,6 +30,8 @@ func New(repository repository.Repository,
 	}
 
 	service.sourceService.ListenGameEvent(service.reconcileDofusDudeIDs)
+
+	// TODO add daily almanax
 
 	return &service, nil
 }
@@ -76,7 +81,7 @@ func (service *Impl) loadAlmanaxEffectsFromDB() error {
 	return nil
 }
 
-func (service *Impl) reconcileDofusDudeIDs() {
+func (service *Impl) reconcileDofusDudeIDs(_ string) {
 	log.Info().Msgf("Reconciling almanax DofusDude IDs...")
 	ctx := context.Background()
 	year := time.Now().Year()

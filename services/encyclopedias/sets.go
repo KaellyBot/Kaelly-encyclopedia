@@ -19,7 +19,8 @@ func (service *Impl) getSetByID(ctx context.Context, id int32, correlationID,
 	}
 
 	items := service.getSetEquipments(ctx, set, correlationID, lg)
-	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
+	icon := service.getSetIcon(set.GetAnkamaId())
+	return mappers.MapSet(set, items, icon, service.equipmentService), nil
 }
 
 func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
@@ -30,7 +31,8 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
 	}
 
 	items := service.getSetEquipments(ctx, set, correlationID, lg)
-	return mappers.MapSet(set, items, service.equipmentService, service.setService), nil
+	icon := service.getSetIcon(set.GetAnkamaId())
+	return mappers.MapSet(set, items, icon, service.equipmentService), nil
 }
 
 func (service *Impl) getSetEquipments(ctx context.Context, set *dodugo.EquipmentSet, correlationID,
@@ -56,4 +58,13 @@ func (service *Impl) getSetEquipments(ctx context.Context, set *dodugo.Equipment
 	}
 
 	return items
+}
+
+func (service *Impl) getSetIcon(setID int32) string {
+	setDB, found := service.setService.GetSetByDofusDude(setID)
+	if found {
+		return setDB.Icon
+	}
+
+	return ""
 }

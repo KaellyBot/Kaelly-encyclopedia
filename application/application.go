@@ -12,6 +12,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
@@ -30,7 +31,14 @@ func New() (*Impl, error) {
 	broker := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress),
 		amqp.WithBindings(encyclopedias.GetBinding()))
 
-	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(time.UTC))
+	// Create scheduler with Europe/Paris timezone
+	location, err := time.LoadLocation("Europe/Paris")
+	if err != nil {
+		return nil, err
+	}
+
+	// Since we have winter/summer hours, UTC location cannot be used easily.
+	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(location))
 	if errScheduler != nil {
 		return nil, errScheduler
 	}
@@ -52,12 +60,13 @@ func New() (*Impl, error) {
 		return nil, errSource
 	}
 
-	almanaxService, errAlmanax := almanaxes.New(almanaxRepo, sourceService)
+	newsService := news.New(broker, sourceService)
+	almanaxService, errAlmanax := almanaxes.New(scheduler, almanaxRepo, sourceService, newsService)
 	if errAlmanax != nil {
 		return nil, errAlmanax
 	}
 
-	setService, errSet := sets.New(setRepo, sourceService, equipmentService)
+	setService, errSet := sets.New(setRepo, newsService, sourceService, equipmentService)
 	if errSet != nil {
 		return nil, errSet
 	}

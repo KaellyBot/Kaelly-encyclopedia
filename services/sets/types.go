@@ -4,20 +4,13 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
 const (
-	imgurUploadURL = "https://api.imgur.com/3/image"
+	setBaseURL = "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/sets/%v.webp"
 )
-
-type imgurResponse struct {
-	Data struct {
-		Link string `json:"link"`
-	} `json:"data"`
-	Success bool `json:"success"`
-	Status  int  `json:"status"`
-}
 
 type Service interface {
 	GetSetByDofusDude(ID int32) (entities.Set, bool)
@@ -25,6 +18,7 @@ type Service interface {
 
 type Impl struct {
 	sets             map[int32]entities.Set
+	newsService      news.Service
 	sourceService    sources.Service
 	equipmentService equipments.Service
 	repository       repository.Repository

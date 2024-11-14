@@ -3,11 +3,8 @@ package sets
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"image"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 
@@ -16,7 +13,6 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
 func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
@@ -131,61 +127,7 @@ func imageToBuffer(img image.Image) (*bytes.Buffer, error) {
 	return buf, nil
 }
 
-func uploadImageToImgur(ctx context.Context, buf *bytes.Buffer) (string, error) {
-	// Create a multipart writer
-	reqBody := &bytes.Buffer{}
-	writer := multipart.NewWriter(reqBody)
-
-	// Create the file field for the image data
-	part, errForm := writer.CreateFormFile("image", "image.png")
-	if errForm != nil {
-		return "", errForm
-	}
-
-	// Write the image data to the file field
-	_, errCopy := io.Copy(part, buf)
-	if errCopy != nil {
-		return "", errCopy
-	}
-
-	// Close the multipart writer to finalize the body
-	errClose := writer.Close()
-	if errClose != nil {
-		return "", errClose
-	}
-
-	// Create the request
-	req, errReq := http.NewRequestWithContext(ctx, http.MethodPost, imgurUploadURL, reqBody)
-	if errReq != nil {
-		return "", errReq
-	}
-
-	// Set necessary headers
-	req.Header.Set("Authorization", fmt.Sprintf("Client-ID %v",
-		viper.GetString(constants.ImgurClientID)))
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-
-	// Send the request
-	client := &http.Client{}
-	resp, errDo := client.Do(req)
-	if errDo != nil {
-		return "", errDo
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("imgur API error, status code: %d", resp.StatusCode)
-	}
-
-	var imgurResponse imgurResponse
-	decoder := json.NewDecoder(resp.Body)
-	if errDecode := decoder.Decode(&imgurResponse); errDecode != nil {
-		return "", errDecode
-	}
-
-	if !imgurResponse.Success {
-		return "", fmt.Errorf("imgur API error, inner status code: %d", imgurResponse.Status)
-	}
-
-	return imgurResponse.Data.Link, nil
+func writeOnDisk(ctx context.Context, buf *bytes.Buffer) error {
+	// TODO write on disk
+	return nil
 }
