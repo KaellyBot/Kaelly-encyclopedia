@@ -147,7 +147,8 @@ func mapConditions(conditions *dodugo.ConditionTreeNode,
 		}
 
 		children := make([]*amqp.EncyclopediaItemAnswer_Conditions, 0)
-		for _, node := range innerConditions.GetChildren() {
+		for _, child := range innerConditions.GetChildren() {
+			node := child
 			children = append(children, mapConditions(&node))
 		}
 

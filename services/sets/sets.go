@@ -31,7 +31,7 @@ func New(repository repository.Repository, newsService news.Service,
 
 	service.sourceService.ListenGameEvent(service.buildMissingSets)
 	// TODO to remove
-	// service.buildMissingSets()
+	// service.buildMissingSets("")
 	return &service, nil
 }
 

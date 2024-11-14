@@ -116,7 +116,7 @@ func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
 }
 
 func writeOnDisk(setID int32, img image.Image) error {
-	path := viper.GetString(constants.SetFolderPath)
+	path := viper.GetString(constants.SetImageFolderPath)
 	filename := fmt.Sprintf("%v.webp", setID)
 	out, err := os.Create(filepath.Join(path, filename))
 	if err != nil {

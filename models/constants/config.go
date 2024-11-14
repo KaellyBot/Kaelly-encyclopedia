@@ -39,8 +39,8 @@ const (
 	// Cron tab to update set icons.
 	UpdateSetCronTab = "UPDATE_SET_CRON_TAB"
 
-	// Folder for set images.
-	SetFolderPath = "SET_FOLDER_PATH"
+	// Path for set images Folder.
+	SetImageFolderPath = "SET_IMAGE_FOLDER_PATH"
 
 	// Timeout to retrieve Dofus data. Duration type.
 	DofusDudeTimeout = "HTTP_TIMEOUT"
@@ -64,7 +64,7 @@ const (
 	defaultRedisCacheSize      = 1000
 	defaultAlmanaxCronTab      = "1 0 0 * * *"
 	defaultUpdateSetCronTab    = "0 0 2 * * *"
-	defaultSetFolderPath       = "/sets"
+	defaultSetImageFolderPath  = "/sets"
 	defaultDofusDudeTimeout    = 10 * time.Second
 	defaultMetricPort          = 2112
 	defaultLogLevel            = zerolog.InfoLevel
@@ -83,7 +83,7 @@ func GetDefaultConfigValues() map[string]any {
 		RedisCacheSize:      defaultRedisCacheSize,
 		AlmanaxCronTab:      defaultAlmanaxCronTab,
 		UpdateSetCronTab:    defaultUpdateSetCronTab,
-		SetFolderPath:       defaultSetFolderPath,
+		SetImageFolderPath:  defaultSetImageFolderPath,
 		DofusDudeTimeout:    defaultDofusDudeTimeout,
 		MetricPort:          defaultMetricPort,
 		LogLevel:            defaultLogLevel.String(),
