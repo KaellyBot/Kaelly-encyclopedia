@@ -19,8 +19,9 @@ type Service interface {
 }
 
 type Impl struct {
-	almanaxes     map[string][]entities.Almanax
-	sourceService sources.Service
-	newsService   news.Service
-	repository    repository.Repository
+	frenchLocation *time.Location
+	almanaxes      map[string][]entities.Almanax
+	sourceService  sources.Service
+	newsService    news.Service
+	repository     repository.Repository
 }

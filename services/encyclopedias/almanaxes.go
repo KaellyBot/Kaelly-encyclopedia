@@ -32,7 +32,7 @@ func (service *Impl) almanaxRequest(ctx amqp.Context, message *amqp.RabbitMQMess
 		return
 	}
 
-	response := mappers.MapAlmanax(almanax, service.sourceService, message.Language)
+	response := mappers.MapAlmanaxAnswer(almanax, service.sourceService, message.Language)
 	service.replyWithSuceededAnswer(ctx, response)
 }
 

@@ -11,7 +11,7 @@ const (
 )
 
 type Service interface {
-	PublishAlmanaxNews()
+	PublishAlmanaxNews(almanaxes []*amqp.NewsAlmanaxMessage_I18NAlmanax)
 	PublishGameNews(gameVersion string)
 	PublishSetNews(missingSetNumber, buildSetNumber int)
 }

@@ -109,13 +109,13 @@ func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntr
 	}
 
 	// Generate set image
-	buf, errImg := service.buildSetImage(ctx, items)
+	image, errImg := service.buildSetImage(ctx, items)
 	if errImg != nil {
 		return errImg
 	}
 
 	// Write image on dedicated volume
-	errUpload := writeOnDisk(ctx, buf)
+	errUpload := writeOnDisk(set.GetAnkamaId(), image)
 	if errUpload != nil {
 		return errUpload
 	}

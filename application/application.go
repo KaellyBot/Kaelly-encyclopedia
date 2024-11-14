@@ -32,13 +32,13 @@ func New() (*Impl, error) {
 		amqp.WithBindings(encyclopedias.GetBinding()))
 
 	// Create scheduler with Europe/Paris timezone
-	location, err := time.LoadLocation("Europe/Paris")
+	frenchLocation, err := time.LoadLocation("Europe/Paris")
 	if err != nil {
 		return nil, err
 	}
 
 	// Since we have winter/summer hours, UTC location cannot be used easily.
-	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(location))
+	scheduler, errScheduler := gocron.NewScheduler(gocron.WithLocation(frenchLocation))
 	if errScheduler != nil {
 		return nil, errScheduler
 	}
@@ -61,7 +61,8 @@ func New() (*Impl, error) {
 	}
 
 	newsService := news.New(broker, sourceService)
-	almanaxService, errAlmanax := almanaxes.New(scheduler, almanaxRepo, sourceService, newsService)
+	almanaxService, errAlmanax := almanaxes.New(scheduler, frenchLocation,
+		almanaxRepo, sourceService, newsService)
 	if errAlmanax != nil {
 		return nil, errAlmanax
 	}

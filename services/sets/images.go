@@ -1,22 +1,25 @@
 package sets
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"image"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 
+	"github.com/chai2010/webp"
 	"github.com/disintegration/imaging"
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
-) (*bytes.Buffer, error) {
+) (image.Image, error) {
 	slotGrid, errSlotGrid := imaging.Open("resources/slot-grid.png")
 	if errSlotGrid != nil {
 		return nil, errSlotGrid
@@ -56,12 +59,7 @@ func (service *Impl) buildSetImage(ctx context.Context, items []*dodugo.Weapon,
 		slotGrid = appendImage(slotGrid, slot, itemImage, points[index])
 	}
 
-	buf, errBuf := imageToBuffer(slotGrid)
-	if errBuf != nil {
-		return nil, errBuf
-	}
-
-	return buf, nil
+	return slotGrid, nil
 }
 
 func appendImage(itemGrid, slot, item image.Image,
@@ -117,17 +115,13 @@ func getImageFromItem(ctx context.Context, item *dodugo.Weapon,
 	return defaultItem
 }
 
-func imageToBuffer(img image.Image) (*bytes.Buffer, error) {
-	buf := new(bytes.Buffer)
-	err := imaging.Encode(buf, img, imaging.PNG)
+func writeOnDisk(setID int32, img image.Image) error {
+	path := viper.GetString(constants.SetFolderPath)
+	filename := fmt.Sprintf("%v.webp", setID)
+	out, err := os.Create(filepath.Join(path, filename))
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return buf, nil
-}
-
-func writeOnDisk(ctx context.Context, buf *bytes.Buffer) error {
-	// TODO write on disk
-	return nil
+	defer out.Close()
+	return webp.Encode(out, img, &webp.Options{Lossless: true})
 }

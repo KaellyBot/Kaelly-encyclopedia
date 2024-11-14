@@ -7,21 +7,25 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
+	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/kaellybot/kaelly-encyclopedia/models/entities"
+	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 	repository "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/news"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
-func New(scheduler gocron.Scheduler, repository repository.Repository,
+func New(scheduler gocron.Scheduler, frenchLocation *time.Location, repository repository.Repository,
 	sourceService sources.Service, newsService news.Service) (*Impl, error) {
 	service := Impl{
-		almanaxes:     make(map[string][]entities.Almanax),
-		sourceService: sourceService,
-		newsService:   newsService,
-		repository:    repository,
+		frenchLocation: frenchLocation,
+		almanaxes:      make(map[string][]entities.Almanax),
+		sourceService:  sourceService,
+		newsService:    newsService,
+		repository:     repository,
 	}
 
 	errDB := service.loadAlmanaxEffectsFromDB()
@@ -31,7 +35,14 @@ func New(scheduler gocron.Scheduler, repository repository.Repository,
 
 	service.sourceService.ListenGameEvent(service.reconcileDofusDudeIDs)
 
-	// TODO add daily almanax
+	_, errJob := scheduler.NewJob(
+		gocron.CronJob(viper.GetString(constants.AlmanaxCronTab), true),
+		gocron.NewTask(func() { service.dispatchDailyAlmanax() }),
+		gocron.WithName("Dispatch daily almanax"),
+	)
+	if errJob != nil {
+		return nil, errJob
+	}
 
 	return &service, nil
 }
@@ -79,6 +90,40 @@ func (service *Impl) loadAlmanaxEffectsFromDB() error {
 	}
 
 	return nil
+}
+
+func (service *Impl) dispatchDailyAlmanax() {
+	log.Info().Msgf("Dispatching daily almanax...")
+	almanaxes := make([]*amqp.NewsAlmanaxMessage_I18NAlmanax, 0)
+	for _, value := range amqp.Language_value {
+		lg := amqp.Language(value)
+
+		// ignore default value like ANY, NONE, etc.
+		if lg == amqp.Language_ANY {
+			continue
+		}
+
+		day := time.Now().In(service.frenchLocation)
+		dofusDudeLg, found := constants.GetLanguages()[lg]
+		if !found {
+			log.Warn().Msgf("Cannot retrieve DofusDude language from amqp.Locale '%v',"+
+				" continuing without this almanax", lg)
+			continue
+		}
+		almanax, err := service.sourceService.GetAlmanaxByDate(context.Background(), day, dofusDudeLg)
+		if err != nil {
+			log.Warn().Err(err).
+				Msgf("Cannot retrieve almanax from DofusDude (lg=%v), continuing without it", lg)
+			continue
+		}
+
+		almanaxes = append(almanaxes, &amqp.NewsAlmanaxMessage_I18NAlmanax{
+			Almanax: mappers.MapAlmanax(almanax, service.sourceService),
+			Locale:  lg,
+		})
+	}
+
+	service.newsService.PublishAlmanaxNews(almanaxes)
 }
 
 func (service *Impl) reconcileDofusDudeIDs(_ string) {

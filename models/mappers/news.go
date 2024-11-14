@@ -1,14 +1,18 @@
 package mappers
 
-import amqp "github.com/kaellybot/kaelly-amqp"
+import (
+	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
+)
 
-func MapAlmanaxNews() *amqp.RabbitMQMessage {
+func MapAlmanaxNews(almanaxes []*amqp.NewsAlmanaxMessage_I18NAlmanax) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
-		Type:               amqp.RabbitMQMessage_NEWS_ALMANAX,
-		Language:           amqp.Language_ANY,
-		Game:               amqp.Game_DOFUS_GAME,
+		Type:     amqp.RabbitMQMessage_NEWS_ALMANAX,
+		Language: amqp.Language_ANY,
+		Game:     amqp.Game_DOFUS_GAME,
 		NewsAlmanaxMessage: &amqp.NewsAlmanaxMessage{
-			// TODO
+			Almanaxes: almanaxes,
+			Source:    constants.GetDofusDudeSource(),
 		},
 	}
 }

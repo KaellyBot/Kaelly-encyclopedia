@@ -16,10 +16,9 @@ func New(broker amqp.MessageBroker, sourceService sources.Service) *Impl {
 	return &service
 }
 
-func (service *Impl) PublishAlmanaxNews() {
+func (service *Impl) PublishAlmanaxNews(almanaxes []*amqp.NewsAlmanaxMessage_I18NAlmanax) {
 	log.Info().Msgf("Publishing almanax news...")
-	// TODO mapper
-	err := service.broker.Emit(mappers.MapAlmanaxNews(),
+	err := service.broker.Emit(mappers.MapAlmanaxNews(almanaxes),
 		amqp.ExchangeNews, newsAlmanaxRoutingKey, amqp.GenerateUUID())
 	if err != nil {
 		log.Error().Err(err).Msgf("Almanax news failed to be published")
