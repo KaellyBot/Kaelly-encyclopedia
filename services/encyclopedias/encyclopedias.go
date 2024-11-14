@@ -74,7 +74,8 @@ func GetBinding() amqp.Binding {
 
 func (service *Impl) Consume() error {
 	log.Info().Msgf("Consuming encyclopedia requests...")
-	return service.broker.Consume(requestQueueName, service.consume)
+	service.broker.Consume(requestQueueName, service.consume)
+	return nil
 }
 
 func (service *Impl) consume(ctx amqp.Context, message *amqp.RabbitMQMessage) {
