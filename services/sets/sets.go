@@ -95,8 +95,11 @@ func (service *Impl) buildMissingSets(_ string) {
 		Int(constants.LogEntityCount, len(missingSets)-errorCount).
 		Msg("Set icons built!")
 
-	errLoad := service.loadSetFromDB()
-	log.Warn().Err(errLoad).Msg("Could not reload set from DB, please restart to take them in account")
+	if errLoad := service.loadSetFromDB(); errLoad != nil {
+		log.Warn().Err(errLoad).
+			Msg("Could not reload set from DB, please restart to take them in account")
+	}
+
 	service.newsService.PublishSetNews(len(missingSets), len(missingSets)-errorCount)
 }
 
