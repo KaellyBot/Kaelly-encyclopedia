@@ -3,6 +3,7 @@ package sources
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"time"
 
@@ -462,10 +463,15 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 	return dodugoAlmanax, nil
 }
 
-func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, language string,
+func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int64, language string,
 ) ([]dodugo.AlmanaxEntry, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
+
+	if daysDuration > math.MaxInt32 || daysDuration < math.MinInt32 {
+		return nil, fmt.Errorf("dayDuration %d overflows int32, returning empty almanax range", daysDuration)
+	}
+	castedDaysDuration := int32(daysDuration)
 
 	var dodugoAlmanax []dodugo.AlmanaxEntry
 	dodugoAlmanaxDate := time.Now().Format(constants.DofusDudeAlmanaxDateFormat)
@@ -474,7 +480,7 @@ func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int32, 
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
 		resp, r, err := service.dofusDudeClient.AlmanaxAPI.
 			GetAlmanaxRange(ctx, language).
-			RangeSize(daysDuration).
+			RangeSize(castedDaysDuration).
 			Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err

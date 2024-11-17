@@ -65,7 +65,7 @@ func (service *Impl) almanaxEffectRequest(ctx amqp.Context, message *amqp.Rabbit
 	adjustedSize := offset + request.GetSize()
 	dodugoAlmanaxes := make([]*dodugo.AlmanaxEntry, 0)
 	almanaxDates := service.almanaxService.GetDatesByAlmanaxEffect(*effect.Id)
-	for i := offset; i < adjustedSize && i < int32(len(almanaxDates)); i++ {
+	for i := offset; i < adjustedSize && i < int64(len(almanaxDates)); i++ {
 		dodugoAlmanax, err := service.sourceService.GetAlmanaxByDate(ctx, almanaxDates[i], lg)
 		if err != nil {
 			log.Error().Str(constants.LogCorrelationID, ctx.CorrelationID).
@@ -80,7 +80,7 @@ func (service *Impl) almanaxEffectRequest(ctx amqp.Context, message *amqp.Rabbit
 	}
 
 	response := mappers.MapAlmanaxEffects(request, effect.GetName(), dodugoAlmanaxes,
-		len(almanaxDates), service.sourceService, message.Language)
+		int64(len(almanaxDates)), service.sourceService, message.Language)
 	service.replyWithSuceededAnswer(ctx, response)
 }
 
@@ -99,7 +99,7 @@ func (service *Impl) almanaxResourceRequest(ctx amqp.Context, message *amqp.Rabb
 	almanax, err := service.sourceService.GetAlmanaxByRange(ctx, request.Duration, lg)
 	if err != nil {
 		log.Error().Str(constants.LogCorrelationID, ctx.CorrelationID).
-			Int32(constants.LogDuration, request.Duration).
+			Int64(constants.LogDuration, request.Duration).
 			Msgf("Error while handling encyclopedia almanax resources, returning failed request")
 		service.replyWithFailedAnswer(ctx, amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_RESOURCE_ANSWER,
 			message.Language)

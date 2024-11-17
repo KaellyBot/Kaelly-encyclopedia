@@ -13,7 +13,7 @@ import (
 )
 
 func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectName string,
-	dodugoAlmanaxes []*dodugo.AlmanaxEntry, total int, sourceService sources.Service,
+	dodugoAlmanaxes []*dodugo.AlmanaxEntry, total int64, sourceService sources.Service,
 	language amqp.Language) *amqp.RabbitMQMessage {
 	almanaxes := make([]*amqp.Almanax, 0)
 	for _, dodugoAlmanax := range dodugoAlmanaxes {
@@ -26,8 +26,8 @@ func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectNam
 	}
 
 	page := request.GetOffset() / request.GetSize()
-	pages := int32(total) / request.GetSize()
-	if int32(total)%request.GetSize() != 0 {
+	pages := total / request.GetSize()
+	if total%request.GetSize() != 0 {
 		pages++
 	}
 
@@ -40,7 +40,7 @@ func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectNam
 			Almanaxes: almanaxes,
 			Page:      page,
 			Pages:     pages,
-			Total:     int32(total),
+			Total:     total,
 			Source:    constants.GetDofusDudeSource(),
 		},
 	}
@@ -88,7 +88,7 @@ func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Servic
 				Icon: icon,
 				Type: itemType,
 			},
-			Quantity: *dodugoAlmanax.Tribute.Quantity,
+			Quantity: int64(*dodugoAlmanax.Tribute.Quantity),
 		},
 		Reward: int64(dodugoAlmanax.GetRewardKamas()),
 		Date:   timestamppb.New(date.UTC()),
@@ -111,9 +111,9 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 	}
 }
 
-func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
+func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int64,
 	sourceService sources.Service, language amqp.Language) *amqp.RabbitMQMessage {
-	quantityPerResource := make(map[string]int32, 0)
+	quantityPerResource := make(map[string]int64, 0)
 	for _, almanax := range dodugoAlmanax {
 		itemName := *almanax.Tribute.GetItem().Name
 		quantity, found := quantityPerResource[itemName]
@@ -121,7 +121,7 @@ func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int32,
 			quantity = 0
 		}
 
-		quantityPerResource[itemName] = quantity + almanax.Tribute.GetQuantity()
+		quantityPerResource[itemName] = quantity + int64(almanax.Tribute.GetQuantity())
 	}
 
 	tributes := make([]*amqp.EncyclopediaAlmanaxResourceAnswer_Tribute, 0)
