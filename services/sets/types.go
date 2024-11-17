@@ -13,11 +13,11 @@ const (
 )
 
 type Service interface {
-	GetSetByDofusDude(ID int32) (entities.Set, bool)
+	GetSetByDofusDude(ID int64) (entities.Set, bool)
 }
 
 type Impl struct {
-	sets             map[int32]entities.Set
+	sets             map[int64]entities.Set
 	newsService      news.Service
 	sourceService    sources.Service
 	equipmentService equipments.Service

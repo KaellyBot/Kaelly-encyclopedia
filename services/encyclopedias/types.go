@@ -25,11 +25,11 @@ var (
 
 type getListFunc func(ctx context.Context, query, correlationID,
 	lg string) (*amqp.EncyclopediaListAnswer, error)
-type getItemByIDFunc func(ctx context.Context, ID int32, correlationID,
+type getItemByIDFunc func(ctx context.Context, ID int64, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error)
 type getItemByQueryFunc func(ctx context.Context, query, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error)
-type getIngredientByIDFunc func(ctx context.Context, ID int32, correlationID,
+type getIngredientByIDFunc func(ctx context.Context, ID int64, correlationID,
 	lg string) (*constants.Ingredient, error)
 
 type getItemFuncs struct {

@@ -51,7 +51,7 @@ func (service *Impl) itemRequest(ctx amqp.Context, message *amqp.RabbitMQMessage
 			return
 		}
 
-		reply, err = funcs.GetItemByID(ctx, int32(ankamaID), ctx.CorrelationID, lg)
+		reply, err = funcs.GetItemByID(ctx, ankamaID, ctx.CorrelationID, lg)
 	} else {
 		reply, err = funcs.GetItemByQuery(ctx, request.Query, ctx.CorrelationID, lg)
 	}
@@ -71,7 +71,7 @@ func (service *Impl) itemRequest(ctx amqp.Context, message *amqp.RabbitMQMessage
 	service.replyWithSuceededAnswer(ctx, response)
 }
 
-func (service *Impl) getItemByID(_ context.Context, _ int32, _,
+func (service *Impl) getItemByID(_ context.Context, _ int64, _,
 	_ string) (*amqp.EncyclopediaItemAnswer, error) {
 	return nil, errBadRequestMessage
 }
@@ -95,7 +95,7 @@ func (service *Impl) getItemByQuery(ctx context.Context, query, correlationID,
 		return nil, sources.ErrNotFound
 	}
 
-	resp, err := funcs.GetItemByID(ctx, item.GetAnkamaId(), correlationID, lg)
+	resp, err := funcs.GetItemByID(ctx, int64(item.GetAnkamaId()), correlationID, lg)
 	if err != nil {
 		return nil, err
 	}

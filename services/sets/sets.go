@@ -20,7 +20,7 @@ func New(repository repository.Repository, newsService news.Service,
 		newsService:      newsService,
 		sourceService:    sourceService,
 		equipmentService: equipmentService,
-		sets:             make(map[int32]entities.Set),
+		sets:             make(map[int64]entities.Set),
 		repository:       repository,
 	}
 
@@ -35,7 +35,7 @@ func New(repository repository.Repository, newsService news.Service,
 	return &service, nil
 }
 
-func (service *Impl) GetSetByDofusDude(id int32) (entities.Set, bool) {
+func (service *Impl) GetSetByDofusDude(id int64) (entities.Set, bool) {
 	item, found := service.sets[id]
 	return item, found
 }
@@ -51,7 +51,7 @@ func (service *Impl) loadSetFromDB() error {
 		Msgf("Sets loaded")
 
 	for _, set := range sets {
-		service.sets[set.DofusDudeID] = set
+		service.sets[int64(set.DofusDudeID)] = set
 	}
 
 	return nil
@@ -69,7 +69,7 @@ func (service *Impl) buildMissingSets(_ string) {
 
 	missingSets := make([]dodugo.SetListEntry, 0)
 	for _, set := range sets {
-		if _, found := service.sets[set.GetAnkamaId()]; !found {
+		if _, found := service.sets[int64(set.GetAnkamaId())]; !found {
 			missingSets = append(missingSets, set)
 		}
 	}
@@ -141,7 +141,7 @@ func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEnt
 	for _, itemID := range set.GetEquipmentIds() {
 		if set.GetIsCosmetic() {
 			cosmetic, errCosmetic := service.sourceService.
-				GetCosmeticByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
+				GetCosmeticByID(ctx, int64(itemID), constants.DofusDudeDefaultLanguage)
 			if errCosmetic != nil {
 				return nil, errCosmetic
 			}
@@ -149,7 +149,7 @@ func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEnt
 			items = append(items, cosmetic)
 		} else {
 			equipment, errItem := service.sourceService.
-				GetEquipmentByID(ctx, itemID, constants.DofusDudeDefaultLanguage)
+				GetEquipmentByID(ctx, int64(itemID), constants.DofusDudeDefaultLanguage)
 			if errItem != nil {
 				return nil, errItem
 			}

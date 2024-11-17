@@ -7,7 +7,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 )
 
-func (service *Impl) getCosmeticByID(ctx context.Context, id int32, correlationID,
+func (service *Impl) getCosmeticByID(ctx context.Context, id int64, correlationID,
 	lg string) (*amqp.EncyclopediaItemAnswer, error) {
 	cosmetic, err := service.sourceService.GetCosmeticByID(ctx, id, lg)
 	if err != nil {
