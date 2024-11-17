@@ -5,6 +5,7 @@ go 1.22
 // replace github.com/kaellybot/kaelly-amqp => ../kaelly-amqp
 
 require (
+	github.com/chai2010/webp v1.1.1
 	github.com/disintegration/imaging v1.6.2
 	github.com/dofusdude/dodugo v0.9.4
 	github.com/go-co-op/gocron/v2 v2.12.1
@@ -22,7 +23,6 @@ require (
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/chai2010/webp v1.1.1
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
