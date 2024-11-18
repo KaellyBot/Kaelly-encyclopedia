@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/kaellybot/kaelly-encyclopedia/application"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -18,7 +16,6 @@ import (
 func init() {
 	initConfig()
 	initLog()
-	initMetrics()
 }
 
 func initConfig() {
@@ -57,23 +54,6 @@ func initLog() {
 		zerolog.SetGlobalLevel(logLevel)
 		log.Debug().Msgf("Logger level set to '%s'", logLevel)
 	}
-}
-
-func initMetrics() {
-	go func() {
-		log.Info().Msgf("Exposing Prometheus metrics...")
-		http.Handle("/metrics", promhttp.Handler())
-
-		server := &http.Server{
-			Addr:              fmt.Sprintf(":%v", viper.GetInt(constants.MetricPort)),
-			ReadHeaderTimeout: 0,
-		}
-
-		err := server.ListenAndServe()
-		if err != nil {
-			log.Error().Err(err).Msgf("Cannot listen and serve Prometheus metrics")
-		}
-	}()
 }
 
 func main() {

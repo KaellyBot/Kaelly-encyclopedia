@@ -5,6 +5,7 @@ import (
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
 	"github.com/kaellybot/kaelly-encyclopedia/utils/databases"
+	"github.com/kaellybot/kaelly-encyclopedia/utils/insights"
 )
 
 type Application interface {
@@ -13,8 +14,10 @@ type Application interface {
 }
 
 type Impl struct {
-	db                  databases.MySQLConnection
 	broker              amqp.MessageBroker
 	scheduler           gocron.Scheduler
+	db                  databases.MySQLConnection
+	probes              insights.Probes
+	prom                insights.PrometheusMetrics
 	encyclopediaService encyclopedias.Service
 }

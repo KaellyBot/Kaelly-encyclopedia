@@ -45,6 +45,9 @@ const (
 	// Timeout to retrieve Dofus data. Duration type.
 	DofusDudeTimeout = "HTTP_TIMEOUT"
 
+	// Probe port.
+	ProbePort = "PROBE_PORT"
+
 	// Metric port.
 	MetricPort = "METRIC_PORT"
 
@@ -66,6 +69,7 @@ const (
 	defaultUpdateSetCronTab    = "0 0 2 * * *"
 	defaultSetImageFolderPath  = "/sets"
 	defaultDofusDudeTimeout    = 10 * time.Second
+	defaultProbePort           = 9090
 	defaultMetricPort          = 2112
 	defaultLogLevel            = zerolog.InfoLevel
 	defaultProduction          = false
@@ -85,6 +89,7 @@ func GetDefaultConfigValues() map[string]any {
 		UpdateSetCronTab:    defaultUpdateSetCronTab,
 		SetImageFolderPath:  defaultSetImageFolderPath,
 		DofusDudeTimeout:    defaultDofusDudeTimeout,
+		ProbePort:           defaultProbePort,
 		MetricPort:          defaultMetricPort,
 		LogLevel:            defaultLogLevel.String(),
 		Production:          defaultProduction,

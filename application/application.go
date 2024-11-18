@@ -17,19 +17,22 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 	"github.com/kaellybot/kaelly-encyclopedia/utils/databases"
+	"github.com/kaellybot/kaelly-encyclopedia/utils/insights"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
 func New() (*Impl, error) {
 	// misc
-	db, errDB := databases.New()
-	if errDB != nil {
-		log.Fatal().Err(errDB).Msgf("DB instantiation failed, shutting down.")
-	}
-
 	broker := amqp.New(constants.RabbitMQClientID, viper.GetString(constants.RabbitMQAddress),
 		amqp.WithBindings(encyclopedias.GetBinding()))
+	db := databases.New()
+	if errDB := db.Run(); errDB != nil {
+		return nil, errDB
+	}
+
+	probes := insights.NewProbes(broker.IsConnected, db.IsConnected)
+	prom := insights.NewPrometheusMetrics()
 
 	// Create scheduler with Europe/Paris timezone
 	frenchLocation, err := time.LoadLocation("Europe/Paris")
@@ -76,14 +79,19 @@ func New() (*Impl, error) {
 		almanaxService, equipmentService, setService)
 
 	return &Impl{
-		db:                  db,
 		broker:              broker,
 		scheduler:           scheduler,
+		db:                  db,
+		probes:              probes,
+		prom:                prom,
 		encyclopediaService: encyclopediaService,
 	}, nil
 }
 
 func (app *Impl) Run() error {
+	app.probes.ListenAndServe()
+	app.prom.ListenAndServe()
+
 	errBroker := app.broker.Run()
 	if errBroker != nil {
 		return errBroker
@@ -105,7 +113,9 @@ func (app *Impl) Shutdown() {
 		log.Error().Err(err).Msg("Cannot shutdown scheduler, continuing...")
 	}
 
-	app.db.Shutdown()
 	app.broker.Shutdown()
+	app.db.Shutdown()
+	app.prom.Shutdown()
+	app.probes.Shutdown()
 	log.Info().Msgf("Application is no longer running")
 }
