@@ -15,7 +15,9 @@ func New() *Impl {
 	return &Impl{
 		cache: cache.New(&cache.Options{
 			Redis: redis.NewClient(&redis.Options{
-				Addr: viper.GetString(constants.RedisAddress),
+				Username: viper.GetString(constants.RedisUser),
+				Password: viper.GetString(constants.RedisPassword),
+				Addr:     viper.GetString(constants.RedisURL),
 			}),
 			LocalCache: cache.NewTinyLFU(
 				viper.GetInt(constants.RedisCacheSize),

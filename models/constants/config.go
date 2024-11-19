@@ -24,8 +24,14 @@ const (
 	// RabbitMQ address.
 	RabbitMQAddress = "RABBITMQ_ADDRESS"
 
-	// Redis address.
-	RedisAddress = "REDIS_ADDRESS"
+	// Redis URL.
+	RedisURL = "REDIS_URL"
+
+	// Redis user.
+	RedisUser = "REDIS_USER"
+
+	// Redis password.
+	RedisPassword = "REDIS_PASSWORD"
 
 	// Redis cache retention. Duration type.
 	RedisCacheRetention = "REDIS_CACHE_RETENTION"
@@ -62,7 +68,9 @@ const (
 	defaultMySQLPassword       = ""
 	defaultMySQLDatabase       = "kaellybot"
 	defaultRabbitMQAddress     = "amqp://localhost:5672"
-	defaultRedisAddress        = "localhost:6379"
+	defaultRedisURL            = "localhost:6379"
+	defaultRedisUser           = ""
+	defaultRedisPassword       = ""
 	defaultRedisCacheRetention = 60 * time.Minute
 	defaultRedisCacheSize      = 1000
 	defaultAlmanaxCronTab      = "1 0 0 * * *"
@@ -82,7 +90,9 @@ func GetDefaultConfigValues() map[string]any {
 		MySQLPassword:       defaultMySQLPassword,
 		MySQLDatabase:       defaultMySQLDatabase,
 		RabbitMQAddress:     defaultRabbitMQAddress,
-		RedisAddress:        defaultRedisAddress,
+		RedisURL:            defaultRedisURL,
+		RedisUser:           defaultRedisUser,
+		RedisPassword:       defaultRedisPassword,
 		RedisCacheRetention: defaultRedisCacheRetention,
 		RedisCacheSize:      defaultRedisCacheSize,
 		AlmanaxCronTab:      defaultAlmanaxCronTab,
