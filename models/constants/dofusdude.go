@@ -64,6 +64,7 @@ func GetLanguages() map[amqp.Language]string {
 		amqp.Language_EN:  "en",
 		amqp.Language_ES:  "es",
 		amqp.Language_DE:  "de",
+		amqp.Language_PT:  "pt",
 	}
 }
 

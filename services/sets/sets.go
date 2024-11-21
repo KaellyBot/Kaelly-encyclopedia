@@ -2,7 +2,6 @@ package sets
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dofusdude/dodugo"
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
@@ -29,9 +28,7 @@ func New(repository repository.Repository, newsService news.Service,
 		return nil, errDB
 	}
 
-	service.sourceService.ListenGameEvent(service.buildMissingSets)
-	// TODO to remove
-	// service.buildMissingSets("")
+	service.sourceService.ListenGameEvent(service.checkMissingSets)
 	return &service, nil
 }
 
@@ -57,8 +54,8 @@ func (service *Impl) loadSetFromDB() error {
 	return nil
 }
 
-func (service *Impl) buildMissingSets(_ string) {
-	log.Info().Msgf("Building missing set icons...")
+func (service *Impl) checkMissingSets(_ string) {
+	log.Info().Msgf("Checking missing set icons...")
 	ctx := context.Background()
 
 	sets, errGet := service.sourceService.GetSets(ctx)
@@ -80,83 +77,5 @@ func (service *Impl) buildMissingSets(_ string) {
 	}
 
 	log.Info().Int(constants.LogEntityCount, len(missingSets)).Msgf("Set icons to build")
-	var errorCount int
-	for _, set := range missingSets {
-		errBuild := service.buildMissingSet(ctx, set)
-		if errBuild != nil {
-			log.Warn().Err(errBuild).
-				Str(constants.LogAnkamaID, fmt.Sprintf("%v", set.GetAnkamaId())).
-				Msgf("Error while building set icon, continuing without this set")
-			errorCount++
-		}
-	}
-
-	log.Info().
-		Int(constants.LogEntityCount, len(missingSets)-errorCount).
-		Msg("Set icons built!")
-
-	if errLoad := service.loadSetFromDB(); errLoad != nil {
-		log.Warn().Err(errLoad).
-			Msg("Could not reload set from DB, please restart to take them in account")
-	}
-
-	service.newsService.PublishSetNews(len(missingSets), len(missingSets)-errorCount)
-}
-
-func (service *Impl) buildMissingSet(ctx context.Context, set dodugo.SetListEntry,
-) error {
-	// Retrieve item icons
-	items, errExtract := service.extractItemIcons(ctx, set)
-	if errExtract != nil {
-		return errExtract
-	}
-
-	// Generate set image
-	image, errImg := service.buildSetImage(ctx, items)
-	if errImg != nil {
-		return errImg
-	}
-
-	// Write image on dedicated volume
-	errUpload := writeOnDisk(set.GetAnkamaId(), image)
-	if errUpload != nil {
-		return errUpload
-	}
-
-	// Store cdn link into database
-	errSave := service.repository.Save(entities.Set{
-		DofusDudeID: set.GetAnkamaId(),
-		Icon:        fmt.Sprintf(setBaseURL, set.AnkamaId),
-	})
-	if errSave != nil {
-		return errSave
-	}
-
-	return nil
-}
-
-func (service *Impl) extractItemIcons(ctx context.Context, set dodugo.SetListEntry,
-) ([]*dodugo.Weapon, error) {
-	items := make([]*dodugo.Weapon, 0)
-	for _, itemID := range set.GetEquipmentIds() {
-		if set.GetIsCosmetic() {
-			cosmetic, errCosmetic := service.sourceService.
-				GetCosmeticByID(ctx, int64(itemID), constants.DofusDudeDefaultLanguage)
-			if errCosmetic != nil {
-				return nil, errCosmetic
-			}
-
-			items = append(items, cosmetic)
-		} else {
-			equipment, errItem := service.sourceService.
-				GetEquipmentByID(ctx, int64(itemID), constants.DofusDudeDefaultLanguage)
-			if errItem != nil {
-				return nil, errItem
-			}
-
-			items = append(items, equipment)
-		}
-	}
-
-	return items, nil
+	service.newsService.PublishSetNews(missingSets)
 }

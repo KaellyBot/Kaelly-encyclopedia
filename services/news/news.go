@@ -1,6 +1,7 @@
 package news
 
 import (
+	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
 	"github.com/kaellybot/kaelly-encyclopedia/models/mappers"
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
@@ -34,9 +35,9 @@ func (service *Impl) PublishGameNews(gameVersion string) {
 	}
 }
 
-func (service *Impl) PublishSetNews(missingSetNumber, buildSetNumber int) {
-	log.Info().Msgf("Publishing set image built news...")
-	err := service.broker.Emit(mappers.MapSetNews(missingSetNumber, buildSetNumber),
+func (service *Impl) PublishSetNews(sets []dodugo.SetListEntry) {
+	log.Info().Msgf("Publishing missing sets news...")
+	err := service.broker.Emit(mappers.MapSetNews(sets),
 		amqp.ExchangeNews, newsSetRoutingKey, amqp.GenerateUUID())
 	if err != nil {
 		log.Error().Err(err).Msgf("Set news failed to be published")

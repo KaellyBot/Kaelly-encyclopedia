@@ -8,10 +8,6 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/sources"
 )
 
-const (
-	setBaseURL = "https://raw.githubusercontent.com/KaellyBot/Kaelly-cdn/refs/heads/main/KaellyBot/sets/%v.webp"
-)
-
 type Service interface {
 	GetSetByDofusDude(ID int64) (entities.Set, bool)
 }
