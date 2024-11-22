@@ -7,6 +7,7 @@ import (
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/repositories/games"
 	"github.com/kaellybot/kaelly-encyclopedia/services/stores"
 )
 
@@ -60,6 +61,7 @@ type Impl struct {
 	eventHandlers   []GameEventHandler
 	dofusDudeClient *dodugo.APIClient
 	storeService    stores.Service
+	gameRepo        games.Repository
 	httpTimeout     time.Duration
 	itemTypes       map[string]amqp.ItemType
 }

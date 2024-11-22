@@ -8,6 +8,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	almanaxRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/almanaxes"
 	equipmentRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/equipments"
+	"github.com/kaellybot/kaelly-encyclopedia/repositories/games"
 	setRepo "github.com/kaellybot/kaelly-encyclopedia/repositories/sets"
 	"github.com/kaellybot/kaelly-encyclopedia/services/almanaxes"
 	"github.com/kaellybot/kaelly-encyclopedia/services/encyclopedias"
@@ -35,7 +36,7 @@ func New() (*Impl, error) {
 	prom := insights.NewPrometheusMetrics()
 
 	// Create scheduler with Europe/Paris timezone
-	frenchLocation, err := time.LoadLocation("Europe/Paris")
+	frenchLocation, err := time.LoadLocation(constants.FrenchTimezone)
 	if err != nil {
 		return nil, err
 	}
@@ -50,6 +51,7 @@ func New() (*Impl, error) {
 	almanaxRepo := almanaxRepo.New(db)
 	equipmentRepo := equipmentRepo.New(db)
 	setRepo := setRepo.New(db)
+	gameRepo := games.New(db)
 
 	// services
 	storeService := stores.New()
@@ -58,7 +60,7 @@ func New() (*Impl, error) {
 		return nil, errEquipment
 	}
 
-	sourceService, errSource := sources.New(scheduler, storeService)
+	sourceService, errSource := sources.New(scheduler, storeService, gameRepo)
 	if errSource != nil {
 		return nil, errSource
 	}
