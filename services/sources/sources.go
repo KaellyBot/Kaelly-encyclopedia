@@ -34,10 +34,6 @@ func New(scheduler gocron.Scheduler, storeService stores.Service,
 		},
 	}
 
-	go func() {
-		service.checkGameVersion()
-	}()
-
 	_, errJob := scheduler.NewJob(
 		gocron.CronJob(viper.GetString(constants.UpdateSetCronTab), true),
 		gocron.NewTask(func() { service.checkGameVersion() }),
