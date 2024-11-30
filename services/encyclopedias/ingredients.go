@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeEntry,
+func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.Recipe,
 	correlationID, lg string) map[int32]*constants.Ingredient {
 	ingredients := make(map[int32]*constants.Ingredient)
 	for _, ingredient := range recipe {
@@ -30,7 +30,7 @@ func (service *Impl) getIngredients(ctx context.Context, recipe []dodugo.RecipeE
 	return ingredients
 }
 
-func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.RecipeEntry,
+func (service *Impl) getIngredient(ctx context.Context, ingredient dodugo.Recipe,
 	correlationID, lg string) (*constants.Ingredient, error) {
 	itemType := service.sourceService.GetItemType(ingredient.GetItemSubtype())
 	getIngredientByFunc, found := service.getIngredientByFuncs[itemType]

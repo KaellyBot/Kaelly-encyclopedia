@@ -2,6 +2,8 @@ package mappers
 
 import (
 	"fmt"
+	"sort"
+	"strconv"
 
 	"github.com/dofusdude/dodugo"
 	amqp "github.com/kaellybot/kaelly-amqp"
@@ -10,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MapSetList(dodugoSets []dodugo.SetListEntry) *amqp.EncyclopediaListAnswer {
+func MapSetList(dodugoSets []dodugo.ListEquipmentSet) *amqp.EncyclopediaListAnswer {
 	sets := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, set := range dodugoSets {
@@ -52,11 +54,21 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 	}
 
 	bonuses := make([]*amqp.EncyclopediaItemAnswer_Set_Bonus, 0)
-	for _, bonus := range set.GetEffects() {
+	for itemNumberStr, bonus := range set.GetEffects() {
+		// Ignore combination with no effects
+		if len(bonus) == 0 {
+			continue
+		}
+
+		itemNumber, err := strconv.ParseInt(itemNumberStr, 10, 64)
+		if err != nil {
+			log.Error().Err(err).
+				Msgf("Cannot convert itemNumber '%v' as int64, ignoring this effect combination", itemNumberStr)
+			continue
+		}
+
 		effects := make([]*amqp.EncyclopediaItemAnswer_Effect, 0)
-		var itemNumber int32
 		for _, effect := range bonus {
-			itemNumber = effect.GetItemCombination()
 			effects = append(effects, &amqp.EncyclopediaItemAnswer_Effect{
 				Id:    fmt.Sprintf("%v", *effect.GetType().Id),
 				Label: effect.GetFormatted(),
@@ -64,10 +76,14 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 		}
 
 		bonuses = append(bonuses, &amqp.EncyclopediaItemAnswer_Set_Bonus{
-			ItemNumber: int64(itemNumber),
+			ItemNumber: itemNumber,
 			Effects:    effects,
 		})
 	}
+
+	sort.Slice(bonuses, func(i, j int) bool {
+		return bonuses[i].ItemNumber < bonuses[j].ItemNumber
+	})
 
 	return &amqp.EncyclopediaItemAnswer{
 		Type: amqp.ItemType_SET_TYPE,
@@ -76,7 +92,7 @@ func MapSet(set *dodugo.EquipmentSet, items map[int32]*dodugo.Weapon,
 			Name:       set.GetName(),
 			Level:      int64(set.GetHighestEquipmentLevel()),
 			Icon:       icon,
-			IsCosmetic: set.GetIsCosmetic(),
+			IsCosmetic: set.GetContainsCosmeticsOnly(),
 			Equipments: equipments,
 			Bonuses:    bonuses,
 		},

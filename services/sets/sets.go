@@ -64,7 +64,7 @@ func (service *Impl) checkMissingSets(_ string) {
 		return
 	}
 
-	missingSets := make([]dodugo.SetListEntry, 0)
+	missingSets := make([]dodugo.ListEquipmentSet, 0)
 	for _, set := range sets {
 		if _, found := service.sets[int64(set.GetAnkamaId())]; !found {
 			missingSets = append(missingSets, set)

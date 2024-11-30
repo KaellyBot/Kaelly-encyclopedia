@@ -30,11 +30,11 @@ type GameEventHandler func(gameVersion string)
 type Service interface {
 	GetItemType(itemType string) amqp.ItemType
 
-	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.GetGameSearch200ResponseInner, error)
-	SearchCosmetics(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
-	SearchEquipments(ctx context.Context, query, lg string) ([]dodugo.ItemListEntry, error)
-	SearchMounts(ctx context.Context, query, lg string) ([]dodugo.MountListEntry, error)
-	SearchSets(ctx context.Context, query, lg string) ([]dodugo.SetListEntry, error)
+	SearchAnyItems(ctx context.Context, query, lg string) ([]dodugo.GameSearch, error)
+	SearchCosmetics(ctx context.Context, query, lg string) ([]dodugo.ListItem, error)
+	SearchEquipments(ctx context.Context, query, lg string) ([]dodugo.ListItem, error)
+	SearchMounts(ctx context.Context, query, lg string) ([]dodugo.Mount, error)
+	SearchSets(ctx context.Context, query, lg string) ([]dodugo.ListEquipmentSet, error)
 	SearchAlmanaxEffects(ctx context.Context, query, lg string) ([]dodugo.GetMetaAlmanaxBonuses200ResponseInner, error)
 
 	GetConsumableByID(ctx context.Context, consumableID int64, lg string) (*dodugo.Resource, error)
@@ -44,15 +44,15 @@ type Service interface {
 	GetQuestItemByID(ctx context.Context, questItemID int64, lg string) (*dodugo.Resource, error)
 	GetResourceByID(ctx context.Context, resourceID int64, lg string) (*dodugo.Resource, error)
 	GetSetByID(ctx context.Context, setID int64, lg string) (*dodugo.EquipmentSet, error)
-	GetSets(ctx context.Context) ([]dodugo.SetListEntry, error)
+	GetSets(ctx context.Context) ([]dodugo.ListEquipmentSet, error)
 
 	GetCosmeticByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetEquipmentByQuery(ctx context.Context, query, lg string) (*dodugo.Weapon, error)
 	GetMountByQuery(ctx context.Context, query, lg string) (*dodugo.Mount, error)
 	GetSetByQuery(ctx context.Context, query, lg string) (*dodugo.EquipmentSet, error)
 
-	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.AlmanaxEntry, error)
-	GetAlmanaxByRange(ctx context.Context, daysDuration int64, language string) ([]dodugo.AlmanaxEntry, error)
+	GetAlmanaxByDate(ctx context.Context, date time.Time, language string) (*dodugo.Almanax, error)
+	GetAlmanaxByRange(ctx context.Context, daysDuration int64, language string) ([]dodugo.Almanax, error)
 
 	ListenGameEvent(handler GameEventHandler)
 }

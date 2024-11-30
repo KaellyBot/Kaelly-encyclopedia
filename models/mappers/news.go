@@ -31,7 +31,7 @@ func MapGameNews(gameVersion string) *amqp.RabbitMQMessage {
 	}
 }
 
-func MapSetNews(sets []dodugo.SetListEntry) *amqp.RabbitMQMessage {
+func MapSetNews(sets []dodugo.ListEquipmentSet) *amqp.RabbitMQMessage {
 	setIDs := make([]string, 0)
 	for _, set := range sets {
 		setIDs = append(setIDs, fmt.Sprintf("%v", set.GetAnkamaId()))

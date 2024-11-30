@@ -63,7 +63,7 @@ func (service *Impl) almanaxEffectRequest(ctx amqp.Context, message *amqp.Rabbit
 
 	offset := request.GetOffset()
 	adjustedSize := offset + request.GetSize()
-	dodugoAlmanaxes := make([]*dodugo.AlmanaxEntry, 0)
+	dodugoAlmanaxes := make([]*dodugo.Almanax, 0)
 	almanaxDates := service.almanaxService.GetDatesByAlmanaxEffect(*effect.Id)
 	for i := offset; i < adjustedSize && i < int64(len(almanaxDates)); i++ {
 		dodugoAlmanax, err := service.sourceService.GetAlmanaxByDate(ctx, almanaxDates[i], lg)

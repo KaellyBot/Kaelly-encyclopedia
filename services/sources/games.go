@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	amqp "github.com/kaellybot/kaelly-amqp"
+	"github.com/kaellybot/kaelly-encyclopedia/models/constants"
 	"github.com/rs/zerolog/log"
 )
 
@@ -23,7 +24,7 @@ func (service *Impl) checkGameVersion() {
 		return
 	}
 
-	resp, r, err := service.dofusDudeClient.MetaAPI.GetMetaVersion(ctx).Execute()
+	resp, r, err := service.dofusDudeClient.MetaAPI.GetMetaVersion(ctx, constants.DofusDudeGame).Execute()
 	if err != nil && r == nil {
 		log.Error().Err(err).Msgf("Cannot retrieve %v version from source, trying later...", game)
 		return

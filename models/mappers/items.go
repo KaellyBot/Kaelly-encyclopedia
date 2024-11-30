@@ -9,7 +9,7 @@ import (
 	"github.com/kaellybot/kaelly-encyclopedia/services/equipments"
 )
 
-func MapItemList(dodugoItems []dodugo.GetGameSearch200ResponseInner) *amqp.EncyclopediaListAnswer {
+func MapItemList(dodugoItems []dodugo.GameSearch) *amqp.EncyclopediaListAnswer {
 	items := make([]*amqp.EncyclopediaListAnswer_Item, 0)
 
 	for _, item := range dodugoItems {
@@ -33,7 +33,7 @@ func MapItem(item *amqp.EncyclopediaItemAnswer, language amqp.Language) *amqp.Ra
 	}
 }
 
-func mapEquipmentType(itemType dodugo.ItemsListEntryTypedType,
+func mapEquipmentType(itemType dodugo.TranslatedId,
 	equipmentService equipments.Service) entities.EquipmentType {
 	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetId())
 	if !found {

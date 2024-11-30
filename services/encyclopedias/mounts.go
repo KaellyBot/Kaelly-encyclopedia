@@ -14,7 +14,7 @@ func (service *Impl) getMountByID(ctx context.Context, id int64, _,
 		return nil, err
 	}
 
-	return mappers.MapMount(mount), nil
+	return mappers.MapMount(mount, service.equipmentService), nil
 }
 
 func (service *Impl) getMountByQuery(ctx context.Context, query, _,
@@ -24,5 +24,5 @@ func (service *Impl) getMountByQuery(ctx context.Context, query, _,
 		return nil, err
 	}
 
-	return mappers.MapMount(mount), nil
+	return mappers.MapMount(mount, service.equipmentService), nil
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectName string,
-	dodugoAlmanaxes []*dodugo.AlmanaxEntry, total int64, sourceService sources.Service,
+	dodugoAlmanaxes []*dodugo.Almanax, total int64, sourceService sources.Service,
 	language amqp.Language) *amqp.RabbitMQMessage {
 	almanaxes := make([]*amqp.Almanax, 0)
 	for _, dodugoAlmanax := range dodugoAlmanaxes {
@@ -46,7 +46,7 @@ func MapAlmanaxEffects(request *amqp.EncyclopediaAlmanaxEffectRequest, effectNam
 	}
 }
 
-func MapAlmanaxAnswer(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
+func MapAlmanaxAnswer(dodugoAlmanax *dodugo.Almanax, sourceService sources.Service,
 	language amqp.Language) *amqp.RabbitMQMessage {
 	return &amqp.RabbitMQMessage{
 		Type:     amqp.RabbitMQMessage_ENCYCLOPEDIA_ALMANAX_ANSWER,
@@ -59,7 +59,7 @@ func MapAlmanaxAnswer(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.
 	}
 }
 
-func MapAlmanax(dodugoAlmanax *dodugo.AlmanaxEntry, sourceService sources.Service,
+func MapAlmanax(dodugoAlmanax *dodugo.Almanax, sourceService sources.Service,
 ) *amqp.Almanax {
 	if dodugoAlmanax == nil {
 		return nil
@@ -111,7 +111,7 @@ func MapAlmanaxEffectList(dodugoAlmanaxEffects []dodugo.GetMetaAlmanaxBonuses200
 	}
 }
 
-func MapAlmanaxResource(dodugoAlmanax []dodugo.AlmanaxEntry, dayDuration int64,
+func MapAlmanaxResource(dodugoAlmanax []dodugo.Almanax, dayDuration int64,
 	sourceService sources.Service, language amqp.Language) *amqp.RabbitMQMessage {
 	quantityPerResource := make(map[string]int64, 0)
 	for _, almanax := range dodugoAlmanax {

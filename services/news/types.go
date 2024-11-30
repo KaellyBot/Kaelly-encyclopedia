@@ -14,7 +14,7 @@ const (
 type Service interface {
 	PublishAlmanaxNews(almanaxes []*amqp.NewsAlmanaxMessage_I18NAlmanax)
 	PublishGameNews(gameVersion string)
-	PublishSetNews(missingSets []dodugo.SetListEntry)
+	PublishSetNews(missingSets []dodugo.ListEquipmentSet)
 }
 
 type Impl struct {

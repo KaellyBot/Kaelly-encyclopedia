@@ -38,7 +38,7 @@ func (service *Impl) getSetByQuery(ctx context.Context, query, correlationID,
 func (service *Impl) getSetEquipments(ctx context.Context, set *dodugo.EquipmentSet, correlationID,
 	lg string) map[int32]*dodugo.Weapon {
 	var getItemByID func(ctx context.Context, equipmentID int64, lg string) (*dodugo.Weapon, error)
-	if set.GetIsCosmetic() {
+	if set.GetContainsCosmeticsOnly() {
 		getItemByID = service.sourceService.GetCosmeticByID
 	} else {
 		getItemByID = service.sourceService.GetEquipmentByID

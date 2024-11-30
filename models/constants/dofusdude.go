@@ -3,12 +3,20 @@ package constants
 import amqp "github.com/kaellybot/kaelly-amqp"
 
 const (
-	DofusDudeGame              = "dofus2"
+	DofusDudeGame              = "dofus3beta"
 	DofusDudeDefaultLanguage   = "en"
 	DofusDudeAlmanaxDateFormat = "2006-01-02"
 	DofusDudeAlmanaxSizeLimit  = 35
 	DofusDudeLimit             = 25
 )
+
+func GetSupportedSearchIndex() []string {
+	return []string{
+		"items-cosmetics",
+		"items-equipment",
+		"mounts",
+	}
+}
 
 func GetSupportedTypeEnums() []string {
 	return []string{

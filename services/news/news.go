@@ -35,7 +35,7 @@ func (service *Impl) PublishGameNews(gameVersion string) {
 	}
 }
 
-func (service *Impl) PublishSetNews(sets []dodugo.SetListEntry) {
+func (service *Impl) PublishSetNews(sets []dodugo.ListEquipmentSet) {
 	log.Info().Msgf("Publishing missing sets news...")
 	err := service.broker.Emit(mappers.MapSetNews(sets),
 		amqp.ExchangeNews, newsSetRoutingKey, amqp.GenerateUUID())

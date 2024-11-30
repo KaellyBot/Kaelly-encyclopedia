@@ -103,20 +103,29 @@ func MapEquipment(item *dodugo.Weapon, ingredientItems map[int32]*constants.Ingr
 			Characteristics: characteristics,
 			WeaponEffects:   weaponEffects,
 			Effects:         effects,
-			Conditions:      mapConditions(item.ConditionTree),
+			Conditions:      mapNullableConditions(item.Conditions),
 			Recipe:          recipe,
 		},
 		Source: constants.GetDofusDudeSource(),
 	}
 }
 
-func mapConditions(conditions *dodugo.ConditionTreeNode,
+func mapNullableConditions(conditions dodugo.NullableConditionNode,
+) *amqp.EncyclopediaItemAnswer_Conditions {
+	if !conditions.IsSet() {
+		return nil
+	}
+
+	return mapConditions(conditions.Get())
+}
+
+func mapConditions(conditions *dodugo.ConditionNode,
 ) *amqp.EncyclopediaItemAnswer_Conditions {
 	if conditions == nil {
 		return nil
 	}
 
-	leaf := conditions.ConditionTreeLeaf
+	leaf := conditions.ConditionLeaf
 	if leaf != nil {
 		return &amqp.EncyclopediaItemAnswer_Conditions{
 			Relation: amqp.EncyclopediaItemAnswer_Conditions_NONE,
@@ -131,7 +140,7 @@ func mapConditions(conditions *dodugo.ConditionTreeNode,
 		}
 	}
 
-	innerConditions := conditions.ConditionTreeRelation
+	innerConditions := conditions.ConditionRelation
 	if innerConditions != nil {
 		var relation amqp.EncyclopediaItemAnswer_Conditions_Relation
 		switch innerConditions.GetRelation() {
@@ -149,7 +158,7 @@ func mapConditions(conditions *dodugo.ConditionTreeNode,
 		children := make([]*amqp.EncyclopediaItemAnswer_Conditions, 0)
 		for _, child := range innerConditions.GetChildren() {
 			node := child
-			children = append(children, mapConditions(&node))
+			children = append(children, mapConditions(node))
 		}
 
 		return &amqp.EncyclopediaItemAnswer_Conditions{

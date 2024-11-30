@@ -26,18 +26,19 @@ func (service *Impl) GetItemType(itemType string) amqp.ItemType {
 }
 
 func (service *Impl) SearchAnyItems(ctx context.Context, query,
-	language string) ([]dodugo.GetGameSearch200ResponseInner, error) {
+	language string) ([]dodugo.GameSearch, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var items []dodugo.GetGameSearch200ResponseInner
+	var items []dodugo.GameSearch
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
 		resp, r, err := service.dofusDudeClient.
 			GameAPI.
 			GetGameSearch(ctx, language, constants.DofusDudeGame).
 			Query(query).
-			FilterTypeEnum(constants.GetSupportedTypeEnums()).
+			FilterSearchIndex(constants.GetSupportedSearchIndex()).
+			FilterTypeNameId(constants.GetSupportedTypeEnums()).
 			Limit(constants.DofusDudeLimit).Execute()
 		if err != nil && (r == nil || r.StatusCode != http.StatusNotFound) {
 			return nil, err
@@ -78,11 +79,11 @@ func (service *Impl) GetConsumableByID(ctx context.Context, itemID int64, langua
 }
 
 func (service *Impl) SearchCosmetics(ctx context.Context, query,
-	language string) ([]dodugo.ItemListEntry, error) {
+	language string) ([]dodugo.ListItem, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var items []dodugo.ItemListEntry
+	var items []dodugo.ListItem
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
 		resp, r, err := service.dofusDudeClient.CosmeticsAPI.
@@ -153,12 +154,10 @@ func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int64, language
 			ImageUrls:              resp.ImageUrls,
 			Effects:                resp.Effects,
 			Conditions:             resp.Conditions,
-			ConditionTree:          resp.ConditionTree,
 			Recipe:                 resp.Recipe,
 			ParentSet:              resp.ParentSet,
 			CriticalHitProbability: nil,
 			CriticalHitBonus:       nil,
-			IsTwoHanded:            nil,
 			MaxCastPerTurn:         nil,
 			ApCost:                 nil,
 			Range:                  nil,
@@ -169,11 +168,11 @@ func (service *Impl) GetCosmeticByID(ctx context.Context, itemID int64, language
 }
 
 func (service *Impl) SearchEquipments(ctx context.Context, query,
-	language string) ([]dodugo.ItemListEntry, error) {
+	language string) ([]dodugo.ListItem, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var items []dodugo.ItemListEntry
+	var items []dodugo.ListItem
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
 		resp, r, err := service.dofusDudeClient.EquipmentAPI.
@@ -294,11 +293,11 @@ func (service *Impl) GetResourceByID(ctx context.Context, itemID int64, language
 }
 
 func (service *Impl) SearchMounts(ctx context.Context, query,
-	language string) ([]dodugo.MountListEntry, error) {
+	language string) ([]dodugo.Mount, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var items []dodugo.MountListEntry
+	var items []dodugo.Mount
 	key := buildListKey(item, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &items) {
 		resp, r, err := service.dofusDudeClient.MountsAPI.
@@ -365,11 +364,11 @@ func (service *Impl) GetMountByID(ctx context.Context, itemID int64, language st
 }
 
 func (service *Impl) SearchSets(ctx context.Context, query,
-	language string) ([]dodugo.SetListEntry, error) {
+	language string) ([]dodugo.ListEquipmentSet, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var sets []dodugo.SetListEntry
+	var sets []dodugo.ListEquipmentSet
 	key := buildListKey(set, query, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &sets) {
 		resp, r, err := service.dofusDudeClient.SetsAPI.
@@ -436,7 +435,7 @@ func (service *Impl) GetSetByID(ctx context.Context, setID int64, language strin
 }
 
 // Returns sets with minimal informations. No cache applied here.
-func (service *Impl) GetSets(ctx context.Context) ([]dodugo.SetListEntry, error) {
+func (service *Impl) GetSets(ctx context.Context) ([]dodugo.ListEquipmentSet, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
@@ -477,11 +476,11 @@ func (service *Impl) SearchAlmanaxEffects(ctx context.Context, query,
 }
 
 func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, language string,
-) (*dodugo.AlmanaxEntry, error) {
+) (*dodugo.Almanax, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
-	var dodugoAlmanax *dodugo.AlmanaxEntry
+	var dodugoAlmanax *dodugo.Almanax
 	dodugoAlmanaxDate := date.Format(constants.DofusDudeAlmanaxDateFormat)
 	key := buildItemKey(almanax, dodugoAlmanaxDate, language, constants.GetEncyclopediasSource().Name)
 	if !service.getElementFromCache(ctx, key, &dodugoAlmanax) {
@@ -505,7 +504,7 @@ func (service *Impl) GetAlmanaxByDate(ctx context.Context, date time.Time, langu
 }
 
 func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int64, language string,
-) ([]dodugo.AlmanaxEntry, error) {
+) ([]dodugo.Almanax, error) {
 	ctx, cancel := context.WithTimeout(ctx, service.httpTimeout)
 	defer cancel()
 
@@ -514,7 +513,7 @@ func (service *Impl) GetAlmanaxByRange(ctx context.Context, daysDuration int64, 
 		return nil, errConv
 	}
 
-	var dodugoAlmanax []dodugo.AlmanaxEntry
+	var dodugoAlmanax []dodugo.Almanax
 	dodugoAlmanaxDate := time.Now().Format(constants.DofusDudeAlmanaxDateFormat)
 	key := buildItemKey(almanaxRange, fmt.Sprintf("%v_%v", dodugoAlmanaxDate, daysDuration),
 		language, constants.GetEncyclopediasSource().Name)
