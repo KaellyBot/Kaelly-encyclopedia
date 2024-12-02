@@ -45,7 +45,10 @@ func MapMount(item *dodugo.Mount, equipmentService equipments.Service) *amqp.Enc
 
 func mapFamilyType(itemType dodugo.MountFamily,
 	equipmentService equipments.Service) entities.EquipmentType {
-	equipmentType, found := equipmentService.GetTypeByDofusDude(itemType.GetAnkamaId())
+	// Applying a negative ID since familyID is in conflict with equipments type;
+	// These IDs were not supposed to be merged.
+	mountType := itemType.GetAnkamaId() * -1
+	equipmentType, found := equipmentService.GetTypeByDofusDude(mountType)
 	if !found {
 		return entities.EquipmentType{
 			EquipmentID: amqp.EquipmentType_NONE,
