@@ -29,8 +29,9 @@ func MapMount(item *dodugo.Mount, equipmentService equipments.Service) *amqp.Enc
 	return &amqp.EncyclopediaItemAnswer{
 		Type: amqp.ItemType_EQUIPMENT_TYPE,
 		Equipment: &amqp.EncyclopediaItemAnswer_Equipment{
-			Id:   fmt.Sprintf("%v", item.GetAnkamaId()),
-			Name: item.GetName(),
+			Id:    fmt.Sprintf("%v", item.GetAnkamaId()),
+			Name:  item.GetName(),
+			Level: constants.MountLevel,
 			Type: &amqp.EncyclopediaItemAnswer_Equipment_Type{
 				ItemType:       equipmentType.ItemID,
 				EquipmentType:  equipmentType.EquipmentID,
