@@ -103,6 +103,7 @@ jobs:
           run: |
             helm upgrade --install ${{ github.event.repository.name }} charts/${{ github.event.repository.name }} \
               --namespace kaellybot \
+              --create-namespace \
               --set image.tag="${{ env.image_tag_name }}" \
               --set secrets.MYSQL_URL="${{ secrets.MYSQL_URL }}" \
               --set secrets.MYSQL_USER="${{ secrets.MYSQL_USER }}" \
